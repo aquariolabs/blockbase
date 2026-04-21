@@ -5,6 +5,10 @@ packages:
 
 catalog:
   "@types/node": ^24
+  "@types/react-dom": ^19.2.3
+  "@types/react": ^19.2.14
+  react-dom: ^19.2.4
+  react: ^19.2.4
   typescript: ^5
   vite-plus: latest
   vite: npm:@voidzero-dev/vite-plus-core@latest
