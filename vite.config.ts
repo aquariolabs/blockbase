@@ -4,7 +4,13 @@ export default defineConfig({
   staged: {
     "*": "vp check --fix",
   },
-  fmt: {},
+  fmt: {
+    sortImports: {},
+    sortTailwindcss: {
+      functions: ["clsx", "cn"],
+      preserveWhitespace: true,
+    },
+  },
   lint: { options: { typeAware: true, typeCheck: true } },
   run: {
     cache: true,
