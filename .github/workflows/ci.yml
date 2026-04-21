@@ -23,8 +23,8 @@ jobs:
           node-version-file: ".node-version"
           cache: true
 
-      - name: ⬣ ESLint
-        run: vp run -r lint
+      - name: ⬣ Lint
+        run: vp lint
 
       - name: ʦ TypeScript
         run: vp run -r typecheck
