@@ -1,20 +1,47 @@
 name: CI
 
-on:
-  push:
-    branches:
-      - main
-  pull_request:
+# Controls when the workflow will run
+on: push
 
+# Cancels all previous runs of this workflow and runs a new one
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Test each aspect of the application
 jobs:
-  static-checks:
+  static-test:
+    name: 🔬 Static tests
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v4
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v6
 
-      - uses: voidzero-dev/setup-vp@v1
+      - name: ⚡ Setup Vite+
+        uses: voidzero-dev/setup-vp@v1
         with:
+          node-version-file: ".node-version"
           cache: true
 
-      - run: vp run ready
+      - name: ⬣ ESLint
+        run: vp run -r lint
+
+      - name: ʦ TypeScript
+        run: vp run -r typecheck
+
+  unit-test:
+    needs: [static-test]
+    name: 🚦 Unit test
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v6
+
+      - name: ⚡ Setup Vite+
+        uses: voidzero-dev/setup-vp@v1
+        with:
+          node-version-file: ".node-version"
+          cache: true
+
+      - name: 🧪 Run unit tests
+        run: vp run test:unit
