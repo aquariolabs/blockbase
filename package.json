@@ -4,7 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "ready": "vp check",
+    "dev": "echo '🔥 `dev` script not implemented'",
+    "test:unit": "echo '🔥 `test:unit` script not implemented'",
+    "ready": "vp fmt && vp lint && vp run -r test && vp run -r build",
     "prepare": "vp config"
   },
   "devDependencies": {

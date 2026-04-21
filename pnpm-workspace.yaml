@@ -3,17 +3,19 @@ packages:
   - packages/*
   - tools/*
 
-catalogMode: prefer
-
 catalog:
   "@types/node": ^24
   typescript: ^5
+  vite-plus: latest
   vite: npm:@voidzero-dev/vite-plus-core@latest
   vitest: npm:@voidzero-dev/vite-plus-test@latest
-  vite-plus: latest
+
+catalogMode: manual
+
 overrides:
   vite: "catalog:"
   vitest: "catalog:"
+
 peerDependencyRules:
   allowAny:
     - vite
