@@ -87,10 +87,8 @@ For GitHub Actions, consider using [`voidzero-dev/setup-vp`](https://github.com/
 - [ ] Run `vp check` and `vp test` to validate changes.
 <!--VITE PLUS END-->
 
-# Template Notes
+## Notes
 
-- This repository is a GitHub template and should stay as a clean monorepo baseline.
-- Keep `apps/` and `packages/` empty in the template itself. Add real entries only in repositories created from this template.
 - `portless` is installed at the workspace root. After creating a new app, update that app's `dev` script to use the repository and app names, for example: `"dev": "portless run --name APP_NAME.REPO_NAME next dev"`.
 - When adding new apps or packages, review whether their dependencies belong in an existing Renovate group before adding new repository-level rules.
 - If a dependency family should be grouped across repositories, prefer updating the shared preset in `github>wladpaiva/renovate-config` instead of creating a one-off rule here.
