@@ -7,7 +7,7 @@ settings:
 catalogs:
   default:
     '@types/node':
-      specifier: ^24
+      specifier: ^24.12.2
       version: 24.12.2
     '@types/react':
       specifier: ^19.2.14
@@ -16,10 +16,10 @@ catalogs:
       specifier: ^19.2.3
       version: 19.2.3
     react:
-      specifier: ^19.2.4
+      specifier: ^19.2.5
       version: 19.2.5
     react-dom:
-      specifier: ^19.2.4
+      specifier: ^19.2.5
       version: 19.2.5
     typescript:
       specifier: ^5
@@ -4423,7 +4423,6 @@ snapshots:
   '@types/node@25.6.0':
     dependencies:
       undici-types: 7.19.2
-    optional: true
 
   '@types/react-dom@19.2.3(@types/react@19.2.14)':
     dependencies:
@@ -4435,7 +4434,7 @@ snapshots:
 
   '@types/set-cookie-parser@2.4.10':
     dependencies:
-      '@types/node': 24.12.2
+      '@types/node': 25.6.0
 
   '@types/statuses@2.0.6': {}
 
@@ -5803,8 +5802,7 @@ snapshots:
 
   undici-types@7.16.0: {}
 
-  undici-types@7.19.2:
-    optional: true
+  undici-types@7.19.2: {}
 
   unicorn-magic@0.3.0: {}
 

@@ -3,12 +3,20 @@ packages:
   - packages/*
   - tools/*
 
+allowBuilds:
+  esbuild: true
+  msw: true
+  sharp: true
+  workerd: true
+
 catalog:
-  "@types/node": ^24
+  "@tailwindcss/vite": ^4.2.4
+  "@types/node": ^24.12.2
   "@types/react": ^19.2.14
   "@types/react-dom": ^19.2.3
-  react: ^19.2.4
-  react-dom: ^19.2.4
+  evlog: ^2.13.0
+  react: ^19.2.5
+  react-dom: ^19.2.5
   typescript: ^5
   vite: npm:@voidzero-dev/vite-plus-core@latest
   vite-plus: latest
