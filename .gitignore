@@ -33,3 +33,10 @@ worker-configuration.d.ts
 
 # AI agent worktrees
 .claude/worktrees/
+
+# test results and reports
+test-results/
+blob-report/
+playwright-report/
+playwright/.cache/
+playwright/.auth/
