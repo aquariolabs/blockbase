@@ -11,7 +11,7 @@
     "prepare": "vp config"
   },
   "devDependencies": {
-    "portless": "^0.12.0",
+    "portless": "0.12.0",
     "vite-plus": "catalog:"
   },
   "engines": {
