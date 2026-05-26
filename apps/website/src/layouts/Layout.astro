@@ -1,0 +1,67 @@
+---
+import { SEO, type SEOProps } from "astro-seo";
+import { Schema } from "astro-seo-schema";
+import PostHog from "../components/Posthog.astro";
+
+import "@workspace/ui/globals.css";
+
+interface Props {
+  title?: string;
+  description?: string;
+  openGraph?: SEOProps["openGraph"];
+}
+
+const DEFAULT_TITLE = "Dia-zero";
+
+const {
+  title,
+  description = "Materiais essenciais de saúde, claros e organizados para estudar melhor.",
+  openGraph = {
+    basic: {
+      title: title ?? DEFAULT_TITLE,
+      type: "website",
+      image: "/assets/icons/study-icon-atlas.png",
+    },
+  },
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
+    <PostHog />
+    <SEO
+      charset="UTF-8"
+      title={title}
+      titleDefault={DEFAULT_TITLE}
+      titleTemplate="%s | Dia-zero"
+      description={description}
+      openGraph={openGraph}
+    />
+    <Schema
+      item={{
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            name: title ?? DEFAULT_TITLE,
+            description,
+          },
+          {
+            "@type": "WebPage",
+            name: title ?? DEFAULT_TITLE,
+            description,
+          },
+        ],
+      }}
+    />
+    <slot name="head" />
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

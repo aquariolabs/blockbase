@@ -10,6 +10,9 @@ allowBuilds:
   workerd: true
 
 catalog:
+  "@astrojs/cloudflare": ^13.5.4
+  "@astrojs/react": ^5.0.5
+  "@astrojs/sitemap": ^3.7.2
   "@fontsource-variable/inter": ^5.2.8
   "@playwright/test": ^1.59.1
   "@storybook/addon-docs": 10.4.1
@@ -18,6 +21,9 @@ catalog:
   "@types/node": ^24.12.2
   "@types/react": ^19.2.14
   "@types/react-dom": ^19.2.3
+  astro: ^6.3.7
+  astro-seo: ^1.1.0
+  astro-seo-schema: ^6.0.0
   class-variance-authority: ^0.7.1
   clsx: ^2.1.1
   evlog: ^2.13.0
@@ -35,6 +41,7 @@ catalog:
   vite: npm:@voidzero-dev/vite-plus-core@latest
   vite-plus: latest
   vitest: npm:@voidzero-dev/vite-plus-test@latest
+  wrangler: ^4.94.0
 
 catalogMode: prefer
 

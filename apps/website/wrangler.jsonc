@@ -1,0 +1,18 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "dia-zero-website",
+  "compatibility_date": "2026-04-23",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "main": "@astrojs/cloudflare/entrypoints/server",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+  },
+  "observability": {
+    "enabled": true,
+  },
+  "vars": {
+    "POSTHOG_KEY": "phc_your_project_key",
+    "POSTHOG_HOST": "https://us.i.posthog.com",
+  },
+}

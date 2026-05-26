@@ -4,9 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "echo '🔥 `dev` script not implemented'",
     "test:unit": "echo '🔥 `test:unit` script not implemented'",
-    "setup:playwright": "echo '🔥 `setup:playwright` script not implemented'",
+    "setup:playwright": "vp run website#setup:playwright",
     "ready": "vp fmt && vp lint && vp run -r test && vp run -r build",
     "prepare": "vp config"
   },
