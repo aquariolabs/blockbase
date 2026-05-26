@@ -1,0 +1,9 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "skipLibCheck": true,
+    "types": ["vite/client"]
+  },
+  "include": [".storybook", "../../packages/ui/src/**/*.stories.tsx"]
+}
