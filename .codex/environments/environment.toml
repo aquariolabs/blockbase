@@ -9,6 +9,6 @@ vp install
 '''
 
 [[actions]]
-name = "Run"
+name = "Run Website"
 icon = "run"
-command = "vp run dev"
+command = "vp run website#dev"
