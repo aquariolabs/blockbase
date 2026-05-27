@@ -4,10 +4,9 @@ on:
   workflow_call:
 
 env:
-  VARLOCK_ENV:
-    test
+  VARLOCK_ENV: "test"
 
-    # Test each aspect of the application
+  # Test each aspect of the application
 jobs:
   static-test:
     name: 🔬 Static tests
