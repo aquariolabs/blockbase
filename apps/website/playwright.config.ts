@@ -19,7 +19,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "vp exec astro dev --host 127.0.0.1 --port 4321",
+    command: "vpx varlock run -- astro dev --host 127.0.0.1 --port 4321",
     url: "http://127.0.0.1:4321",
     reuseExistingServer: !process.env.CI,
   },

@@ -34,7 +34,9 @@ export default defineConfig({
   site: "https://dia-zero.aquariolabs.com",
   trailingSlash: "never",
   output: "static",
-  adapter: cloudflare(),
+  adapter: cloudflare({
+    prerenderEnvironment: "node", // needed for varlock + astro + cloudflare integration
+  }),
   integrations: [varlockAstroIntegration(), react(), sitemap()],
   vite: {
     plugins: [
