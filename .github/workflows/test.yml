@@ -45,7 +45,7 @@ jobs:
     timeout-minutes: 5
     runs-on: blacksmith-4vcpu-ubuntu-2404
     container:
-      image: mcr.microsoft.com/playwright:v1.59.1-noble
+      image: mcr.microsoft.com/playwright:v1.60.0-noble
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@v6
