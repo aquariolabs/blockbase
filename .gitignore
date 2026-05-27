@@ -30,7 +30,11 @@ worker-configuration.d.ts
 *.sw?
 
 # environment variables
-*.local
+.env.local
+.env.agent-ci
+.env.*.local
+env.d.ts
+
 
 # AI agent worktrees
 .claude/worktrees/

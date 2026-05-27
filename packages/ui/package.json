@@ -9,9 +9,6 @@
     "./components/*": "./src/components/*.tsx",
     "./hooks/*": "./src/hooks/*.ts"
   },
-  "scripts": {
-    "typecheck": "tsc --noEmit"
-  },
   "dependencies": {
     "@fontsource-variable/inter": "catalog:",
     "class-variance-authority": "catalog:",

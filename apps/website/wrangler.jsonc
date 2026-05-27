@@ -11,8 +11,4 @@
   "observability": {
     "enabled": true,
   },
-  "vars": {
-    "POSTHOG_KEY": "phc_your_project_key",
-    "POSTHOG_HOST": "https://us.i.posthog.com",
-  },
 }

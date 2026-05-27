@@ -4,18 +4,16 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "prepare": "wrangler types",
-    "dev": "portless run --name website.dia-zero astro dev",
-    "build": "astro build",
+    "prepare": "vp run generate:types",
     "preview": "astro preview",
-    "typecheck": "tsc --noEmit",
-    "generate-types": "wrangler types",
+    "generate:types": "varlock-wrangler types",
     "test:e2e": "playwright test",
     "setup:playwright": "playwright install --with-deps"
   },
   "dependencies": {
     "@astrojs/cloudflare": "catalog:",
     "@astrojs/sitemap": "catalog:",
+    "@varlock/astro-integration": "catalog:",
     "@workspace/ui": "workspace:*",
     "astro": "catalog:",
     "astro-seo": "catalog:",
@@ -24,12 +22,15 @@
   },
   "devDependencies": {
     "@astrojs/react": "catalog:",
+    "@cloudflare/vite-plugin": "catalog:",
     "@playwright/test": "catalog:",
     "@tailwindcss/vite": "catalog:",
     "@types/node": "catalog:",
+    "@varlock/cloudflare-integration": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
     "typescript": "catalog:",
+    "varlock": "catalog:",
     "vite": "catalog:",
     "wrangler": "catalog:"
   },

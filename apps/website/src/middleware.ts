@@ -1,14 +1,18 @@
 import { defineMiddleware } from "astro:middleware";
-import { env } from "cloudflare:workers";
 import { createRequestLogger, initLogger } from "evlog";
 import { createPostHogDrain } from "evlog/posthog";
+import { ENV } from "varlock/env";
+
+const drain = ENV.POSTHOG_KEY
+  ? createPostHogDrain({
+      apiKey: ENV.POSTHOG_KEY,
+      host: ENV.POSTHOG_HOST,
+    })
+  : undefined;
 
 initLogger({
   env: { service: "website" },
-  drain: createPostHogDrain({
-    apiKey: env.POSTHOG_KEY,
-    host: env.POSTHOG_HOST,
-  }),
+  ...(drain ? { drain } : {}),
 });
 
 export const onRequest = defineMiddleware(async ({ request, locals }, next) => {

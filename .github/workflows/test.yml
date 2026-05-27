@@ -1,12 +1,7 @@
-name: CI
+name: Tests
 
-# Controls when the workflow will run
-on: push
-
-# Cancels all previous runs of this workflow and runs a new one
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+on:
+  workflow_call:
 
 # Test each aspect of the application
 jobs:
@@ -23,11 +18,8 @@ jobs:
           node-version-file: ".node-version"
           cache: true
 
-      - name: ⬣ Lint
+      - name: ⬣ Lint & type check
         run: vp lint
-
-      - name: ʦ TypeScript
-        run: vp run -r typecheck
 
   unit-test:
     needs: [static-test]
@@ -44,7 +36,7 @@ jobs:
           cache: true
 
       - name: 🧪 Run unit tests
-        run: vp run test:unit
+        run: vp test
 
   test-e2e:
     needs: [static-test]

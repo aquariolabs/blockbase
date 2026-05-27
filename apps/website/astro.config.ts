@@ -2,6 +2,7 @@ import cloudflare from "@astrojs/cloudflare";
 import react from "@astrojs/react";
 import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
+import varlockAstroIntegration from "@varlock/astro-integration";
 import { defineConfig } from "astro/config";
 import evlog from "evlog/vite";
 import type { Plugin } from "vite";
@@ -34,7 +35,7 @@ export default defineConfig({
   trailingSlash: "never",
   output: "static",
   adapter: cloudflare(),
-  integrations: [react(), sitemap()],
+  integrations: [varlockAstroIntegration(), react(), sitemap()],
   vite: {
     plugins: [
       removeAstroToolbarEsbuildOptimizer(),

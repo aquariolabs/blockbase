@@ -1,0 +1,25 @@
+name: CI/CD Orchestrator
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main]
+
+# Cancels all previous runs of this workflow and runs a new one
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-stage:
+    uses: ./.github/workflows/test.yml
+
+  deploy-stage:
+    needs: test-stage
+    permissions:
+      contents: read
+      pull-requests: write
+      deployments: write
+    uses: ./.github/workflows/deploy.yml
+    secrets: inherit

@@ -9,7 +9,6 @@
     "types": ["node", "react", "react-dom"],
     "jsx": "react-jsx",
     "strict": true,
-    "noUnusedLocals": true,
     "noEmit": true,
     "esModuleInterop": true,
     "isolatedModules": true,
