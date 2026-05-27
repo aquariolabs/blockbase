@@ -8,7 +8,7 @@ export default defineConfig({
         cache: false,
       },
       build: {
-        command: "astro build",
+        command: "varlock run -- astro build",
       },
       "deploy:production": {
         command: "varlock-wrangler deploy",
