@@ -4,7 +4,6 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test:unit": "echo '🔥 `test:unit` script not implemented'",
     "setup:playwright": "vp run website#setup:playwright",
     "ready": "vp fmt && vp lint && vp run -r test && vp run -r build",
     "prepare": "vp config"
@@ -14,7 +13,7 @@
     "vite-plus": "catalog:"
   },
   "engines": {
-    "node": "24.15.0"
+    "node": "24.16.0"
   },
-  "packageManager": "pnpm@10.33.2"
+  "packageManager": "pnpm@11.4.0"
 }

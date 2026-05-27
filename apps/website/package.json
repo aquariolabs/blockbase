@@ -33,9 +33,5 @@
     "varlock": "catalog:",
     "vite": "catalog:",
     "wrangler": "catalog:"
-  },
-  "engines": {
-    "node": ">=22.12.0"
-  },
-  "packageManager": "pnpm@10.33.2"
+  }
 }
