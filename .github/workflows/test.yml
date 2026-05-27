@@ -3,7 +3,11 @@ name: Tests
 on:
   workflow_call:
 
-# Test each aspect of the application
+env:
+  VARLOCK_ENV:
+    test
+
+    # Test each aspect of the application
 jobs:
   static-test:
     name: 🔬 Static tests
