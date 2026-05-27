@@ -6,7 +6,7 @@
   "scripts": {
     "prepare": "vp run generate:types",
     "preview": "astro preview",
-    "generate:types": "varlock-wrangler types",
+    "generate:types": "varlock typegen",
     "test:e2e": "playwright test",
     "setup:playwright": "playwright install --with-deps"
   },
