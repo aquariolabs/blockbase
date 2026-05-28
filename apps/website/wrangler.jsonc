@@ -8,6 +8,12 @@
     "directory": "./dist",
     "binding": "ASSETS",
   },
+  "routes": [
+    {
+      "pattern": "dia-zero.aquariolabs.com",
+      "custom_domain": true,
+    },
+  ],
   "observability": {
     "enabled": true,
   },

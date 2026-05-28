@@ -74,6 +74,7 @@ jobs:
     runs-on: blacksmith-4vcpu-ubuntu-2404
     environment:
       name: production
+      url: "https://dia-zero.aquariolabs.com"
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@v6
