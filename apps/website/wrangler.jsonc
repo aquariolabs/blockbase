@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "dia-zero-website",
+  "name": "aquariolabs-dia-zero-website",
   "compatibility_date": "2026-04-23",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "main": "@astrojs/cloudflare/entrypoints/server",
