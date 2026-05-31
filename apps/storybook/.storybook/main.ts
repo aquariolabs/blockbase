@@ -3,11 +3,14 @@ import tailwindcss from "@tailwindcss/vite";
 import { mergeConfig } from "vite-plus";
 
 const config: StorybookConfig = {
-  stories: [
-    "../../../apps/**/*.stories.@(js|jsx|mjs|ts|tsx)",
-    "../../../packages/**/*.stories.@(js|jsx|mjs|ts|tsx)",
+  staticDirs: ["../public"],
+  stories: ["../../../packages/**/*.mdx", "../../../packages/**/*.stories.tsx"],
+  addons: [
+    "@storybook/addon-docs",
+    "@storybook/addon-vitest",
+    "@storybook/addon-a11y",
+    "@chromatic-com/storybook",
   ],
-  addons: ["@storybook/addon-docs"],
   framework: {
     name: "@storybook/react-vite",
     options: {},
