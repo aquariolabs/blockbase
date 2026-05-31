@@ -1,0 +1,121 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+import { ColorSwatch, ColorSwatchItem } from "./color-swatches";
+
+<Meta title="Colors" />
+
+# Colors
+
+All UI color tokens are defined in `packages/ui/src/styles/globals.css` and rendered here from CSS variables.
+
+Values are resolved from CSS variables in the `:root` theme context.
+
+### Surface
+
+Canvas, content, elevated containers, and quiet supporting areas.
+
+<ColorSwatch>
+  <ColorSwatchItem
+    name="background"
+    foreground="foreground"
+    description="Default page canvas with the primary copy color."
+  />
+  <ColorSwatchItem
+    name="card"
+    foreground="card-foreground"
+    description="Persistent content containers and cards."
+  />
+  <ColorSwatchItem
+    name="popover"
+    foreground="popover-foreground"
+    description="Floating overlays, menus, sheets, and temporary surfaces."
+  />
+  <ColorSwatchItem
+    name="muted"
+    foreground="muted-foreground"
+    description="Subtle surface treatment for helper areas, empty states, and secondary content blocks."
+  />
+</ColorSwatch>
+
+### Controls
+
+Non-fill tokens for component outlines, form fields, and focus indicators.
+
+<ColorSwatch>
+  <ColorSwatchItem
+    name="border"
+    description="Default separators, strokes, and low-emphasis component outlines."
+  />
+  <ColorSwatchItem name="input" description="Form control borders and input-specific outlines." />
+  <ColorSwatchItem name="ring" description="Focus rings and active keyboard navigation emphasis." />
+</ColorSwatch>
+
+### Actions
+
+Semantic actions and their foreground pairs.
+
+<ColorSwatch>
+  <ColorSwatchItem
+    name="primary"
+    foreground="primary-foreground"
+    description="Primary calls to action and selected states."
+  />
+  <ColorSwatchItem
+    name="commerce"
+    foreground="commerce-foreground"
+    description="Purchase, checkout, pricing, and revenue-related actions."
+  />
+  <ColorSwatchItem
+    name="secondary"
+    foreground="secondary-foreground"
+    description="Secondary actions, filters, and low-risk selectable controls."
+  />
+  <ColorSwatchItem
+    name="accent"
+    foreground="accent-foreground"
+    description="Highlight actions and optimistic emphasis."
+  />
+  <ColorSwatchItem
+    name="destructive"
+    foreground="destructive-foreground"
+    description="Errors, deletion, cancellation, and irreversible actions."
+  />
+</ColorSwatch>
+
+### Charts
+
+Data visualization sequence.
+
+<ColorSwatch>
+  <ColorSwatchItem name="chart-1" description="First data series and strongest chart emphasis." />
+  <ColorSwatchItem name="chart-2" description="Second data series and positive comparison color." />
+  <ColorSwatchItem name="chart-3" description="Third data series and warm supporting emphasis." />
+  <ColorSwatchItem name="chart-4" description="Fourth data series and soft contrast color." />
+  <ColorSwatchItem name="chart-5" description="Fifth data series and extended palette contrast." />
+</ColorSwatch>
+
+### Sidebar
+
+Navigation shell colors.
+
+<ColorSwatch>
+  <ColorSwatchItem
+    name="sidebar"
+    foreground="sidebar-foreground"
+    description="Navigation rail and app shell background."
+  />
+  <ColorSwatchItem
+    name="sidebar-primary"
+    foreground="sidebar-primary-foreground"
+    description="Primary navigation action or active app-level destination."
+  />
+  <ColorSwatchItem
+    name="sidebar-accent"
+    foreground="sidebar-accent-foreground"
+    description="Hovered, selected, or grouped navigation items."
+  />
+  <ColorSwatchItem name="sidebar-border" description="Sidebar dividers and shell separation." />
+  <ColorSwatchItem
+    name="sidebar-ring"
+    description="Sidebar-local focus and active navigation rings."
+  />
+</ColorSwatch>
