@@ -1,5 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
+  // TODO: replace with the correct project name
   "name": "aquariolabs-dia-zero-website",
   "compatibility_date": "2026-04-23",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
@@ -10,6 +11,7 @@
   },
   "routes": [
     {
+      // TODO: replace with the correct project route
       "pattern": "dia-zero.aquariolabs.com",
       "custom_domain": true,
     },

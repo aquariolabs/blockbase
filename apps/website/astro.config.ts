@@ -31,6 +31,7 @@ function removeAstroToolbarEsbuildOptimizer(): Plugin {
 
 // https://astro.build/config
 export default defineConfig({
+  // TODO: replace with the correct project route
   site: "https://dia-zero.aquariolabs.com",
   trailingSlash: "never",
   output: "static",
