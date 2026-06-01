@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "portless",
-    "dev:app": "varlock run -- astro dev",
+    "dev:app": "varlock run -- astro dev --host ${HOST:-127.0.0.1} --port ${PORT:-4321}",
     "prepare": "vp run generate:types",
     "preview": "astro preview",
     "generate:types": "varlock typegen",

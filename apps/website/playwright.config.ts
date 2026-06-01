@@ -9,7 +9,7 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: "html",
   use: {
-    baseURL: "http://127.0.0.1:4321",
+    baseURL: "http://localhost:4321",
     trace: "on-first-retry",
     headless: !!process.env.CI,
   },
@@ -20,9 +20,9 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "vpx varlock run -- astro dev --host 127.0.0.1 --port 4321",
+    command: "varlock run -- astro dev",
     stdout: "pipe",
-    url: "http://127.0.0.1:4321",
+    port: 4321,
     reuseExistingServer: !process.env.CI,
     env: {
       VARLOCK_ENV: "test",
