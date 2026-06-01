@@ -33,7 +33,9 @@ vp run storybook#dev
 
 O app `website` roda via `portless` em `https://website.dia-zero.localhost`.
 Ao criar um projeto derivado, ajuste os nomes do app, do Worker, do dominio e
-do host `portless` para o novo repositorio.
+do host `portless` para o novo repositorio. A configuracao do host fica no
+campo `"portless"` de `apps/website/package.json`; o task `dev` do Vite+ chama
+`portless`, que executa o script `dev:app` por tras do proxy.
 
 ## Validacao
 
@@ -62,7 +64,7 @@ As variaveis de ambiente esperadas pelo app ficam em
 
 - renomeie o app, Worker e dominio em `apps/website/wrangler.jsonc`
 - ajuste `site` em `apps/website/astro.config.ts`
-- atualize o nome usado pelo `portless` em `apps/website/vite.config.ts`
+- atualize o nome usado pelo `portless` em `apps/website/package.json`
 - revise secrets e variables nos workflows do GitHub
 - substitua a homepage, SEO, Schema.org e assets sociais
 - mantenha dependencias compartilhadas no catalogo do `pnpm-workspace.yaml`

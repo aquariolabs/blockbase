@@ -4,6 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "dev": "portless",
+    "dev:app": "varlock run -- astro dev",
     "prepare": "vp run generate:types",
     "preview": "astro preview",
     "generate:types": "varlock typegen",
@@ -33,5 +35,9 @@
     "varlock": "catalog:",
     "vite": "catalog:",
     "wrangler": "catalog:"
+  },
+  "portless": {
+    "name": "website.dia-zero",
+    "script": "dev:app"
   }
 }

@@ -3,10 +3,6 @@ import { defineConfig } from "vite-plus";
 export default defineConfig({
   run: {
     tasks: {
-      dev: {
-        command: "varlock run -- portless run --name website.dia-zero astro dev",
-        cache: false,
-      },
       build: {
         command: "varlock run -- astro build",
         env: ["POSTHOG_KEY", "POSTHOG_HOST"],

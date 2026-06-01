@@ -28,7 +28,8 @@ vp run website#deploy:production
 
 O servidor local usa `portless` e fica em
 `https://website.dia-zero.localhost`. Em repos derivados, troque esse nome em
-`vite.config.ts`.
+`package.json`, no campo `"portless"`. O script `dev:app` roda o Astro
+diretamente quando for necessario bypassar o proxy.
 
 ## Variaveis de ambiente
 
