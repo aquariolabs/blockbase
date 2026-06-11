@@ -17,9 +17,6 @@ jobs:
       contents: read
       deployments: write
     runs-on: blacksmith-4vcpu-ubuntu-2404
-    environment:
-      name: preview
-      url: ${{ steps.deploy.outputs.branch-preview-url }}
     env:
       PREVIEW_ALIAS: pr-${{ github.event.pull_request.number }}
     steps:
@@ -36,33 +33,20 @@ jobs:
 
       - name: ☁️ Upload preview Worker version
         id: deploy
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
-        run: |
-          set -o pipefail
-
-          output="$(vp run website#deploy:preview --preview-alias "$PREVIEW_ALIAS" | tee /dev/stderr)"
-
-          deployment_url="$(printf '%s\n' "$output" | sed -n 's/^Version Preview URL: //p' | tail -n 1)"
-          branch_preview_url="$(printf '%s\n' "$output" | sed -n 's/^Version Preview Alias URL: //p' | tail -n 1)"
-
-          if [ -z "$deployment_url" ] || [ -z "$branch_preview_url" ]; then
-            echo "Could not find preview URLs in deploy output."
-            exit 1
-          fi
-
-          {
-            echo "deployment-url=$deployment_url"
-            echo "branch-preview-url=$branch_preview_url"
-          } >> "$GITHUB_OUTPUT"
+        uses: wladpaiva/varlock-wrangler-action@main
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: apps/website
+          command: versions upload --preview-alias ${{ env.PREVIEW_ALIAS }}
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Comment Preview URL on PR
         if: ${{ github.event.pull_request.number || github.event.workflow_run.pull_requests[0].number }}
         uses: moojing/cf-preview-bot@v1
         with:
           deployment_url: ${{ steps.deploy.outputs.deployment-url }}
-          branch_preview_url: ${{ steps.deploy.outputs.branch-preview-url }}
+          branch_preview_url: ${{ steps.deploy.outputs.pages-deployment-alias-url }}
 
   deploy-production:
     name: 🚀 Deploy production
@@ -72,10 +56,6 @@ jobs:
       contents: read
       deployments: write
     runs-on: blacksmith-4vcpu-ubuntu-2404
-    environment:
-      name: production
-      #  TODO: replace with the correct project route
-      url: "https://dia-zero.aquariolabs.com"
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@v6
@@ -89,7 +69,10 @@ jobs:
         run: vp run website#build
 
       - name: ☁️ Deploy Worker
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
-        run: vp run website#deploy:production
+        uses: wladpaiva/varlock-wrangler-action@main
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: apps/website
+          command: deploy
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
