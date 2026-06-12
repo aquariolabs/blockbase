@@ -8,18 +8,15 @@ env:
   POSTHOG_HOST: ${{ vars.POSTHOG_HOST }}
 
 jobs:
-  deploy-preview:
-    name: 🚤 Deploy preview
-    # only execute on non-production branches
-    if: github.ref != 'refs/heads/main'
+  deploy-website:
+    name: ☁️ Deploy website
     permissions:
-      pull-requests: write
       contents: read
       deployments: write
     runs-on: blacksmith-4vcpu-ubuntu-2404
     environment:
-      name: preview
-      url: ${{ steps.deploy.outputs.branch-preview-url }}
+      name: ${{ github.ref == 'refs/heads/main' && 'production' || 'preview' }}
+      url: ${{ github.ref == 'refs/heads/main' && steps.deploy.outputs.pages-deployment-alias-url || steps.versions-upload.outputs.pages-deployment-alias-url }}
     env:
       PREVIEW_ALIAS: pr-${{ github.event.pull_request.number }}
     steps:
@@ -31,65 +28,44 @@ jobs:
         with:
           cache: true
 
-      - name: 🏗️ Build APPS
-        run: vp run website#build
-
-      - name: ☁️ Upload preview Worker version
-        id: deploy
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
-        run: |
-          set -o pipefail
-
-          output="$(vp run website#deploy:preview --preview-alias "$PREVIEW_ALIAS" | tee /dev/stderr)"
-
-          deployment_url="$(printf '%s\n' "$output" | sed -n 's/^Version Preview URL: //p' | tail -n 1)"
-          branch_preview_url="$(printf '%s\n' "$output" | sed -n 's/^Version Preview Alias URL: //p' | tail -n 1)"
-
-          if [ -z "$deployment_url" ] || [ -z "$branch_preview_url" ]; then
-            echo "Could not find preview URLs in deploy output."
-            exit 1
-          fi
-
-          {
-            echo "deployment-url=$deployment_url"
-            echo "branch-preview-url=$branch_preview_url"
-          } >> "$GITHUB_OUTPUT"
-
-      - name: Comment Preview URL on PR
-        if: ${{ github.event.pull_request.number || github.event.workflow_run.pull_requests[0].number }}
-        uses: moojing/cf-preview-bot@v1
-        with:
-          deployment_url: ${{ steps.deploy.outputs.deployment-url }}
-          branch_preview_url: ${{ steps.deploy.outputs.branch-preview-url }}
-
-  deploy-production:
-    name: 🚀 Deploy production
-    # only execute on the main branch
-    if: github.ref == 'refs/heads/main'
-    permissions:
-      contents: read
-      deployments: write
-    runs-on: blacksmith-4vcpu-ubuntu-2404
-    environment:
-      name: production
-      #  TODO: replace with the correct project route
-      url: "https://dia-zero.aquariolabs.com"
-    steps:
-      - name: ⬇️ Checkout repo
-        uses: actions/checkout@v6
-
-      - name: ⚡ Setup Vite+
-        uses: voidzero-dev/setup-vp@v1
-        with:
-          cache: true
-
-      - name: 🏗️ Build APPS
+      - name: 🏗️ Build Website
         run: vp run website#build
 
       - name: ☁️ Deploy Worker
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
-        run: vp run website#deploy:production
+        id: deploy
+        # only execute on the main branch
+        if: github.ref == 'refs/heads/main'
+        uses: wladpaiva/varlock-wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: apps/website
+          packageManager: vp
+          skipInstall: true
+          command: deploy
+
+      - name: ☁️ Upload preview Worker version
+        id: versions-upload
+        # only execute on non-production branches
+        if: github.ref != 'refs/heads/main'
+        uses: wladpaiva/varlock-wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: apps/website
+          packageManager: vp
+          skipInstall: true
+          preCommands: wrangler triggers deploy
+          command: versions upload --preview-alias ${{ env.PREVIEW_ALIAS }}
+
+      - name: 📝 Add website deploy summary
+        if: github.ref != 'refs/heads/main'
+        run: |
+          {
+            echo "## Website preview deploy"
+            echo
+            echo "| URL | Value |"
+            echo "| --- | --- |"
+            echo "| Deployment | ${{ steps.versions-upload.outputs.deployment-url }} |"
+            echo "| Alias | ${{ steps.versions-upload.outputs.pages-deployment-alias-url }} |"
+          } >> "$GITHUB_STEP_SUMMARY"
