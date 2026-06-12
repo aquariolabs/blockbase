@@ -38,6 +38,7 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: apps/website
+          packageManager: vp
           command: versions upload --preview-alias ${{ env.PREVIEW_ALIAS }}
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
 
@@ -74,5 +75,6 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: apps/website
+          packageManager: vp
           command: deploy
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
