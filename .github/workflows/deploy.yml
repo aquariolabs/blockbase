@@ -39,6 +39,7 @@ jobs:
           accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: apps/website
           packageManager: vp
+          skipInstall: true
           varlockVersion: 1.2.0
           varlockCloudflareIntegrationVersion: 1.1.2
           wranglerVersion: 4.94.0
@@ -79,6 +80,7 @@ jobs:
           accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: apps/website
           packageManager: vp
+          skipInstall: true
           varlockVersion: 1.2.0
           varlockCloudflareIntegrationVersion: 1.1.2
           wranglerVersion: 4.94.0
