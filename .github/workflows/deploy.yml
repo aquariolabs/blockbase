@@ -39,6 +39,9 @@ jobs:
           accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: apps/website
           packageManager: vp
+          varlockVersion: 1.2.0
+          varlockCloudflareIntegrationVersion: 1.1.2
+          wranglerVersion: 4.94.0
           command: versions upload --preview-alias ${{ env.PREVIEW_ALIAS }}
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
 
@@ -76,5 +79,8 @@ jobs:
           accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: apps/website
           packageManager: vp
+          varlockVersion: 1.2.0
+          varlockCloudflareIntegrationVersion: 1.1.2
+          wranglerVersion: 4.94.0
           command: deploy
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
