@@ -58,10 +58,3 @@ jobs:
           skipInstall: true
           preCommands: wrangler triggers deploy
           command: versions upload --preview-alias ${{ env.PREVIEW_ALIAS }}
-
-      - name: Comment Preview URL on PR
-        if: github.ref != 'refs/heads/main'
-        uses: moojing/cf-preview-bot@v1
-        with:
-          deployment_url: ${{ steps.versions-upload.outputs.deployment-url }}
-          branch_preview_url: ${{ steps.versions-upload.outputs.pages-deployment-alias-url  }}
