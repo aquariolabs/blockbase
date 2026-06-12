@@ -31,6 +31,20 @@ jobs:
       - name: 🏗️ Build APPS
         run: vp run website#build
 
+      - name: 🌐 Apply Worker preview triggers
+        uses: wladpaiva/varlock-wrangler-action@v4.0.1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: apps/website
+          packageManager: vp
+          skipInstall: true
+          varlockVersion: 1.2.0
+          varlockCloudflareIntegrationVersion: 1.1.2
+          wranglerVersion: 4.94.0
+          command: triggers deploy
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
       - name: ☁️ Upload preview Worker version
         id: deploy
         uses: wladpaiva/varlock-wrangler-action@v4.0.1
@@ -46,12 +60,30 @@ jobs:
           command: versions upload --preview-alias ${{ env.PREVIEW_ALIAS }}
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: 🔗 Resolve Worker preview URLs
+        id: preview
+        env:
+          COMMAND_OUTPUT: ${{ steps.deploy.outputs.command-output }}
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          preview_url="$(printf '%s\n' "$COMMAND_OUTPUT" | sed -n 's/^Version Preview URL: //p' | tail -n 1)"
+          branch_preview_url="$(printf '%s\n' "$COMMAND_OUTPUT" | sed -n 's/^Version Preview Alias URL: //p' | tail -n 1)"
+
+          if [[ -z "$preview_url" ]]; then
+            preview_url="$DEPLOYMENT_URL"
+          fi
+
+          {
+            echo "preview-url=$preview_url"
+            echo "branch-preview-url=$branch_preview_url"
+          } >> "$GITHUB_OUTPUT"
+
       - name: Comment Preview URL on PR
         if: ${{ github.event.pull_request.number || github.event.workflow_run.pull_requests[0].number }}
         uses: moojing/cf-preview-bot@v1
         with:
-          deployment_url: ${{ steps.deploy.outputs.deployment-url }}
-          branch_preview_url: ${{ steps.deploy.outputs.pages-deployment-alias-url }}
+          deployment_url: ${{ steps.preview.outputs.preview-url }}
+          branch_preview_url: ${{ steps.preview.outputs.branch-preview-url }}
 
   deploy-production:
     name: 🚀 Deploy production
