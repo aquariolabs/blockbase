@@ -31,20 +31,6 @@ jobs:
       - name: 🏗️ Build APPS
         run: vp run website#build
 
-      - name: 🌐 Apply Worker preview triggers
-        uses: wladpaiva/varlock-wrangler-action@v4.0.1
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
-          workingDirectory: apps/website
-          packageManager: vp
-          skipInstall: true
-          varlockVersion: 1.2.0
-          varlockCloudflareIntegrationVersion: 1.1.2
-          wranglerVersion: 4.94.0
-          command: triggers deploy
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-
       - name: ☁️ Upload preview Worker version
         id: deploy
         uses: wladpaiva/varlock-wrangler-action@v4.0.1
@@ -57,6 +43,7 @@ jobs:
           varlockVersion: 1.2.0
           varlockCloudflareIntegrationVersion: 1.1.2
           wranglerVersion: 4.94.0
+          preCommands: wrangler triggers deploy
           command: versions upload --preview-alias ${{ env.PREVIEW_ALIAS }}
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
 
