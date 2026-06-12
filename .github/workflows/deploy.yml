@@ -8,15 +8,16 @@ env:
   POSTHOG_HOST: ${{ vars.POSTHOG_HOST }}
 
 jobs:
-  deploy-preview:
-    name: 🚤 Deploy preview
-    # only execute on non-production branches
-    if: github.ref != 'refs/heads/main'
+  deploy-website:
+    name: ☁️ Deploy website
     permissions:
       pull-requests: write
       contents: read
       deployments: write
     runs-on: blacksmith-4vcpu-ubuntu-2404
+    environment:
+      name: ${{ github.ref == 'refs/heads/main' && 'production' || 'preview' }}
+      url: ${{ github.ref == 'refs/heads/main' && steps.deploy.outputs.pages-deployment-alias-url || steps.versions-upload.outputs.pages-deployment-alias-url }}
     env:
       PREVIEW_ALIAS: pr-${{ github.event.pull_request.number }}
     steps:
@@ -28,11 +29,26 @@ jobs:
         with:
           cache: true
 
-      - name: 🏗️ Build APPS
+      - name: 🏗️ Build Website
         run: vp run website#build
 
-      - name: ☁️ Upload preview Worker version
+      - name: ☁️ Deploy Worker
         id: deploy
+        # only execute on the main branch
+        if: github.ref == 'refs/heads/main'
+        uses: wladpaiva/varlock-wrangler-action@v4.0.2
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: apps/website
+          packageManager: vp
+          skipInstall: true
+          command: deploy
+
+      - name: ☁️ Upload preview Worker version
+        id: versions-upload
+        # only execute on non-production branches
+        if: github.ref != 'refs/heads/main'
         uses: wladpaiva/varlock-wrangler-action@v4.0.2
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -42,41 +58,10 @@ jobs:
           skipInstall: true
           preCommands: wrangler triggers deploy
           command: versions upload --preview-alias ${{ env.PREVIEW_ALIAS }}
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Comment Preview URL on PR
+        if: github.ref != 'refs/heads/main'
         uses: moojing/cf-preview-bot@v1
         with:
-          deployment_url: ${{ steps.deploy.outputs.deployment-url }}
-          branch_preview_url: ${{ steps.deploy.outputs.pages-deployment-alias-url  }}
-
-  deploy-production:
-    name: 🚀 Deploy production
-    # only execute on the main branch
-    if: github.ref == 'refs/heads/main'
-    permissions:
-      contents: read
-      deployments: write
-    runs-on: blacksmith-4vcpu-ubuntu-2404
-    steps:
-      - name: ⬇️ Checkout repo
-        uses: actions/checkout@v6
-
-      - name: ⚡ Setup Vite+
-        uses: voidzero-dev/setup-vp@v1
-        with:
-          cache: true
-
-      - name: 🏗️ Build APPS
-        run: vp run website#build
-
-      - name: ☁️ Deploy Worker
-        uses: wladpaiva/varlock-wrangler-action@v4.0.2
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
-          workingDirectory: apps/website
-          packageManager: vp
-          skipInstall: true
-          command: deploy
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          deployment_url: ${{ steps.versions-upload.outputs.deployment-url }}
+          branch_preview_url: ${{ steps.versions-upload.outputs.pages-deployment-alias-url  }}
