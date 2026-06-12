@@ -33,7 +33,7 @@ jobs:
 
       - name: ☁️ Upload preview Worker version
         id: deploy
-        uses: wladpaiva/varlock-wrangler-action@v4.0.1
+        uses: wladpaiva/varlock-wrangler-action@v4.0.2
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
@@ -71,7 +71,7 @@ jobs:
         run: vp run website#build
 
       - name: ☁️ Deploy Worker
-        uses: wladpaiva/varlock-wrangler-action@v4.0.1
+        uses: wladpaiva/varlock-wrangler-action@v4.0.2
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
