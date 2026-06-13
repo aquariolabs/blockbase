@@ -20,7 +20,7 @@ jobs:
         id: template-token
         uses: actions/create-github-app-token@v3
         with:
-          app-id: ${{ secrets.TEMPLATE_SYNC_APP_ID }}
+          client-id: ${{ vars.TEMPLATE_SYNC_APP_CLIENT_ID }}
           private-key: ${{ secrets.TEMPLATE_SYNC_APP_PRIVATE_KEY }}
           owner: aquariolabs
           repositories: dia-zero
@@ -30,7 +30,7 @@ jobs:
         id: target-token
         uses: actions/create-github-app-token@v3
         with:
-          app-id: ${{ secrets.TEMPLATE_SYNC_APP_ID }}
+          client-id: ${{ vars.TEMPLATE_SYNC_APP_CLIENT_ID }}
           private-key: ${{ secrets.TEMPLATE_SYNC_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
           repositories: ${{ github.event.repository.name }}
