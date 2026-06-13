@@ -16,8 +16,31 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Create template token
+        id: template-token
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ secrets.TEMPLATE_SYNC_APP_ID }}
+          private-key: ${{ secrets.TEMPLATE_SYNC_APP_PRIVATE_KEY }}
+          owner: aquariolabs
+          repositories: dia-zero
+          permission-contents: read
+
+      - name: Create target token
+        id: target-token
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ secrets.TEMPLATE_SYNC_APP_ID }}
+          private-key: ${{ secrets.TEMPLATE_SYNC_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ github.event.repository.name }}
+          permission-contents: write
+          permission-pull-requests: write
+
       - name: actions-template-sync
         uses: AndreasAugustin/actions-template-sync@v2
         with:
           source_repo_path: aquariolabs/dia-zero
           upstream_branch: main
+          source_gh_token: ${{ steps.template-token.outputs.token }}
+          target_gh_token: ${{ steps.target-token.outputs.token }}
