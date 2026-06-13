@@ -47,3 +47,4 @@ jobs:
           upstream_branch: main
           source_gh_token: ${{ steps.template-token.outputs.token }}
           target_gh_token: ${{ steps.target-token.outputs.token }}
+          git_remote_pull_params: --allow-unrelated-histories --no-edit --strategy=recursive
