@@ -38,6 +38,7 @@ jobs:
           repositories: ${{ github.event.repository.name }}
           permission-contents: write
           permission-pull-requests: write
+          permission-workflows: write
 
       - name: actions-template-sync
         uses: AndreasAugustin/actions-template-sync@v2
