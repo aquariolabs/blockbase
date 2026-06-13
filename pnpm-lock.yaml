@@ -55,8 +55,8 @@ catalogs:
       specifier: ^1.0.2
       version: 1.0.2
     '@varlock/cloudflare-integration':
-      specifier: 1.1.2
-      version: 1.1.2
+      specifier: 1.1.5
+      version: 1.1.5
     '@vitest/browser-playwright':
       specifier: ^4.1.7
       version: 4.1.7
@@ -250,7 +250,7 @@ importers:
         version: 24.12.2
       '@varlock/cloudflare-integration':
         specifier: 'catalog:'
-        version: 1.1.2(@cloudflare/vite-plugin@1.38.0(@voidzero-dev/vite-plus-core@0.1.22(@types/node@24.12.2)(esbuild@0.27.7)(jiti@2.7.0)(typescript@5.9.3)(yaml@2.9.0))(workerd@1.20260521.1)(wrangler@4.94.0))(@voidzero-dev/vite-plus-core@0.1.22(@types/node@24.12.2)(esbuild@0.27.7)(jiti@2.7.0)(typescript@5.9.3)(yaml@2.9.0))(varlock@1.2.0)(wrangler@4.94.0)
+        version: 1.1.5(@cloudflare/vite-plugin@1.38.0(@voidzero-dev/vite-plus-core@0.1.22(@types/node@24.12.2)(esbuild@0.27.7)(jiti@2.7.0)(typescript@5.9.3)(yaml@2.9.0))(workerd@1.20260521.1)(wrangler@4.94.0))(@voidzero-dev/vite-plus-core@0.1.22(@types/node@24.12.2)(esbuild@0.27.7)(jiti@2.7.0)(typescript@5.9.3)(yaml@2.9.0))(varlock@1.2.0)(wrangler@4.94.0)
       react:
         specifier: 'catalog:'
         version: 19.2.5
@@ -2972,13 +2972,13 @@ packages:
       astro: '>=4'
       varlock: ^1.1.0
 
-  '@varlock/cloudflare-integration@1.1.2':
-    resolution: {integrity: sha512-qs7FDhQkHhFS7+1vMUwG2h1/rTA3D6qmBZwTD4ov0FSsLq6rxusVxfBWaIKdhqeoFz7s611vTWYEt+EZSylVNQ==}
+  '@varlock/cloudflare-integration@1.1.5':
+    resolution: {integrity: sha512-V5QM58GTuWvsC+royOYgEGJ1o6cjiuLSDGfKUPBhmdkQSODKCnGqjv5pRPqFUmlI6YPWqly0g3bWVq2l0fbWew==}
     engines: {node: '>=22'}
     hasBin: true
     peerDependencies:
       '@cloudflare/vite-plugin': '>=1'
-      varlock: ^1.1.0
+      varlock: ^1.5.0
       vite: '>=5'
       wrangler: '>=3'
     peerDependenciesMeta:
@@ -8434,7 +8434,7 @@ snapshots:
       astro: 6.3.7(@types/node@24.12.2)(jiti@2.7.0)(typescript@5.9.3)(yaml@2.9.0)
       varlock: 1.2.0
 
-  '@varlock/cloudflare-integration@1.1.2(@cloudflare/vite-plugin@1.38.0(@voidzero-dev/vite-plus-core@0.1.22(@types/node@24.12.2)(esbuild@0.27.7)(jiti@2.7.0)(typescript@5.9.3)(yaml@2.9.0))(workerd@1.20260521.1)(wrangler@4.94.0))(@voidzero-dev/vite-plus-core@0.1.22(@types/node@24.12.2)(esbuild@0.27.7)(jiti@2.7.0)(typescript@5.9.3)(yaml@2.9.0))(varlock@1.2.0)(wrangler@4.94.0)':
+  '@varlock/cloudflare-integration@1.1.5(@cloudflare/vite-plugin@1.38.0(@voidzero-dev/vite-plus-core@0.1.22(@types/node@24.12.2)(esbuild@0.27.7)(jiti@2.7.0)(typescript@5.9.3)(yaml@2.9.0))(workerd@1.20260521.1)(wrangler@4.94.0))(@voidzero-dev/vite-plus-core@0.1.22(@types/node@24.12.2)(esbuild@0.27.7)(jiti@2.7.0)(typescript@5.9.3)(yaml@2.9.0))(varlock@1.2.0)(wrangler@4.94.0)':
     dependencies:
       varlock: 1.2.0
     optionalDependencies:
