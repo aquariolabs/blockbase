@@ -1,0 +1,63 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/Fortaleza"
+    cooldown:
+      default-days: 3
+    open-pull-requests-limit: 10
+    rebase-strategy: "auto"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    pull-request-branch-name:
+      separator: "-"
+    labels:
+      - "dependencies"
+    groups:
+      security-patches:
+        applies-to: "security-updates"
+        update-types:
+          - "patch"
+      vite-plus-toolchain:
+        patterns:
+          - "vite-plus"
+      production-dependencies:
+        dependency-type: "production"
+        update-types:
+          - "minor"
+          - "patch"
+      development-dependencies:
+        dependency-type: "development"
+        update-types:
+          - "minor"
+          - "patch"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/Fortaleza"
+    open-pull-requests-limit: 5
+    rebase-strategy: "auto"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    pull-request-branch-name:
+      separator: "-"
+    labels:
+      - "dependencies"
+    groups:
+      security-patches:
+        applies-to: "security-updates"
+        patterns:
+          - "*"
+      github-actions:
+        patterns:
+          - "*"
