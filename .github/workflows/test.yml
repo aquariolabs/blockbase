@@ -53,8 +53,31 @@ jobs:
         with:
           cache: true
 
+      - name: Get Playwright version
+        id: playwright-version
+        run: |
+          VERSION=$(vp ls --recursive --depth 0 --json | node -e "
+            const data = JSON.parse(require('fs').readFileSync(0, 'utf-8'));
+            const pkg = data.find(p => p.devDependencies?.['@playwright/test'] || p.dependencies?.['@playwright/test']);
+            const version = pkg?.devDependencies?.['@playwright/test']?.version || pkg?.dependencies?.['@playwright/test']?.version;
+            console.log(version || 'unknown');
+          ")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Cache Playwright Browsers
+        id: cache-playwright
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ steps.playwright-version.outputs.version }}
+
       - name: Install Playwright Browsers
+        if: steps.cache-playwright.outputs.cache-hit != 'true'
         run: vp run setup:playwright
+
+      - name: Install Playwright OS Dependencies Only
+        if: steps.cache-playwright.outputs.cache-hit == 'true'
+        run: vp run website#playwright install-deps
 
       - name: 🎭 Run Playwright tests
         run: vp run -r test:e2e
