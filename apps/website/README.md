@@ -22,8 +22,6 @@ Execute os comandos a partir da raiz do monorepo:
 vp run website#dev
 vp run website#build
 vp run website#test:e2e
-vp run website#deploy:preview
-vp run website#deploy:production
 ```
 
 O servidor local usa `portless` e fica em

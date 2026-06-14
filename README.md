@@ -50,13 +50,6 @@ mudancas: formatacao, lint, testes e build de todos os projetos.
 
 ## Deploy
 
-O app base `website` usa Astro com adapter Cloudflare, Wrangler e Varlock:
-
-```bash
-vp run website#deploy:preview
-vp run website#deploy:production
-```
-
 As variaveis de ambiente esperadas pelo app ficam em
 `apps/website/.env.schema`.
 
