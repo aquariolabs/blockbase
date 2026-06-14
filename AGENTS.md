@@ -18,8 +18,3 @@ Docs are local at `node_modules/vite-plus/docs` or online at https://viteplus.de
 ## Notes
 
 - `portless` is installed at the workspace root. After creating a new app, configure that app's `package.json` with a `portless` block using the app and repository names, for example: `"portless": { "name": "APP_NAME.REPO_NAME", "script": "dev:app" }`. Keep the underlying framework command in the referenced script, such as `"dev:app": "next dev"`, and have the Vite+ `dev` task run `portless`.
-- When adding new apps or packages, review whether their dependencies belong in an existing Renovate group before adding new repository-level rules.
-- If a dependency family should be grouped across repositories, prefer updating the shared preset in `github>wladpaiva/renovate-config` instead of creating a one-off rule here.
-- Do not add a dedicated Renovate `packageRule` for a single dependency unless the change needs behavior beyond grouping, such as a custom schedule, labels, or approvals.
-- Group dependencies only when they are usually reviewed together in practice.
-- If a new dependency family needs its own cadence, add a focused rule instead of leaving Renovate to open one PR per package.
