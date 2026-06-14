@@ -101,12 +101,19 @@ jobs:
             exit 0
           fi
 
+          pr_options=()
+
+          if [ "${merge_status}" = "conflicted" ]; then
+            pr_options+=(--draft)
+          fi
+
           gh pr create \
             --repo "${GITHUB_REPOSITORY}" \
             --base "${GITHUB_REF_NAME}" \
             --head "${branch}" \
             --title "Sync Dia Zero template" \
-            --body-file "${body_file}"
+            --body-file "${body_file}" \
+            "${pr_options[@]}"
 
           if [ "${merge_status}" = "conflicted" ]; then
             echo "::warning::Template sync opened a pull request with conflicts."
