@@ -17,6 +17,8 @@ jobs:
 
   deploy-stage:
     needs: test-stage
+    # PRs from dependabot won't deploy to prevent a malicious package exfiltrate secrets
+    if: github.event_name != 'pull_request' || github.actor != 'dependabot[bot]'
     permissions:
       contents: read
       pull-requests: write
