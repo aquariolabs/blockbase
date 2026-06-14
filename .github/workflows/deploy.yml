@@ -6,6 +6,7 @@ on:
 env:
   POSTHOG_KEY: ${{ vars.POSTHOG_KEY }}
   POSTHOG_HOST: ${{ vars.POSTHOG_HOST }}
+  PREVIEW_ALIAS: pr-${{ github.event.pull_request.number }}
 
 jobs:
   deploy-website:
@@ -17,8 +18,6 @@ jobs:
     environment:
       name: ${{ github.ref == 'refs/heads/main' && 'production' || 'preview' }}
       url: ${{ github.ref == 'refs/heads/main' && steps.deploy.outputs.pages-deployment-alias-url || steps.versions-upload.outputs.pages-deployment-alias-url }}
-    env:
-      PREVIEW_ALIAS: pr-${{ github.event.pull_request.number }}
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@v6
