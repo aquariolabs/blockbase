@@ -62,12 +62,41 @@ jobs:
 
           template_sha="$(git rev-parse --short template/main)"
           branch="chore/template-sync-${template_sha}"
+          body_file="$(mktemp)"
 
           git switch -c "${branch}"
-          git merge --no-edit template/main
+          merge_status="clean"
+
+          if ! git merge --no-edit template/main; then
+            merge_status="conflicted"
+            conflicted_files="$(git diff --name-only --diff-filter=U | sort)"
+
+            {
+              echo "Merge aquariolabs/dia-zero@${template_sha} into ${GITHUB_REPOSITORY}."
+              echo
+              echo "This automatic template sync found conflicts that need manual resolution."
+              echo "Conflict markers were committed so the pull request can be reviewed and resolved normally."
+              echo
+              echo "Conflicted files:"
+              printf '%s\n' "${conflicted_files}" | sed 's/^/- /'
+            } > "${body_file}"
+
+            git add -A
+            git commit --no-edit
+          else
+            echo "Merge aquariolabs/dia-zero@${template_sha} into ${GITHUB_REPOSITORY}." > "${body_file}"
+          fi
+
           git push --force-with-lease origin "${branch}"
 
-          if gh pr view "${branch}" --repo "${GITHUB_REPOSITORY}" > /dev/null 2>&1; then
+          existing_pr_count="$(gh pr list \
+            --repo "${GITHUB_REPOSITORY}" \
+            --head "${branch}" \
+            --state open \
+            --json number \
+            --jq 'length')"
+
+          if [ "${existing_pr_count}" != "0" ]; then
             echo "Template sync pull request already exists for ${branch}."
             exit 0
           fi
@@ -77,4 +106,8 @@ jobs:
             --base "${GITHUB_REF_NAME}" \
             --head "${branch}" \
             --title "Sync Dia Zero template" \
-            --body "Merge aquariolabs/dia-zero@${template_sha} into ${GITHUB_REPOSITORY}."
+            --body-file "${body_file}"
+
+          if [ "${merge_status}" = "conflicted" ]; then
+            echo "::warning::Template sync opened a pull request with conflicts."
+          fi
