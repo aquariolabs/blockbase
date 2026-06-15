@@ -10,7 +10,7 @@
     "preview": "astro preview",
     "generate:types": "varlock typegen",
     "test:e2e": "playwright test",
-    "setup:playwright": "playwright install --with-deps"
+    "playwright": "playwright"
   },
   "dependencies": {
     "@astrojs/cloudflare": "catalog:",
