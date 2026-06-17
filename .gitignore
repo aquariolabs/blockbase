@@ -29,9 +29,11 @@ worker-configuration.d.ts
 *.sln
 *.sw?
 
+# @redwoodjs/agent-ci vars
+*.agent-ci
+
 # environment variables
 .env.local
-.env.agent-ci
 .env.*.local
 env.d.ts
 
