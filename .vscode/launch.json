@@ -1,0 +1,12 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Website: Development server",
+      "command": "./node_modules/.bin/astro dev",
+      "cwd": "${workspaceFolder}/apps/website",
+      "request": "launch",
+      "type": "node-terminal"
+    }
+  ]
+}
