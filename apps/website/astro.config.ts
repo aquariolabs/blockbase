@@ -6,12 +6,9 @@ import varlockAstroIntegration from "@varlock/astro-integration";
 import { defineConfig } from "astro/config";
 import evlog from "evlog/vite";
 
-// https://astro.build/config
 export default defineConfig({
   // TODO: replace with the correct project route
   site: "https://dia-zero.aquariolabs.com",
-  trailingSlash: "never",
-  output: "static",
   adapter: cloudflare({
     prerenderEnvironment: "node", // needed for varlock + astro + cloudflare integration
   }),
