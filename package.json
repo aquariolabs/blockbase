@@ -12,8 +12,14 @@
     "portless": "catalog:",
     "vite-plus": "catalog:"
   },
-  "engines": {
-    "node": "24.16.0"
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "11.8.0",
+      "onFail": "download"
+    }
   },
-  "packageManager": "pnpm@11.8.0"
+  "engines": {
+    "node": ">=22.18.0"
+  }
 }
