@@ -20,7 +20,7 @@ jobs:
       url: ${{ github.ref == 'refs/heads/main' && steps.deploy.outputs.pages-deployment-alias-url || steps.versions-upload.outputs.pages-deployment-alias-url }}
     steps:
       - name: ⬇️ Checkout repo
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: ⚡ Setup Vite+
         uses: voidzero-dev/setup-vp@v1
