@@ -4,7 +4,7 @@ App Astro base do template `dia-zero`, preparado para deploy no Cloudflare.
 
 ## Stack atual
 
-- Astro 6 com output estatico e adapter Cloudflare
+- Astro 7 com output estatico e adapter Cloudflare
 - Cloudflare Workers/Assets via Wrangler
 - Varlock para schema e injecao de variaveis de ambiente
 - Tailwind CSS 4 e componentes React de `@workspace/ui`
