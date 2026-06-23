@@ -20,6 +20,7 @@ export const onRequest = defineMiddleware(async ({ request, locals }, next) => {
   const log = createRequestLogger({
     method: request.method,
     path: url.pathname,
+    waitUntil: locals.cfContext?.waitUntil.bind(locals.cfContext),
   });
 
   locals.log = log;
