@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "portless",
     "dev:app": "varlock run -- astro dev --host ${HOST:-127.0.0.1} --port ${PORT:-4321}",
-    "prepare": "varlock typegen",
+    "prepare": "varlock typegen && astro sync",
     "preview": "astro preview",
     "generate:types": "varlock typegen",
     "test:e2e": "playwright test",

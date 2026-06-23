@@ -4,16 +4,16 @@ import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
 import varlockAstroIntegration from "@varlock/astro-integration";
 import robotsTxt from "astro-robots-txt";
-import { defineConfig, passthroughImageService } from "astro/config";
+import { defineConfig } from "astro/config";
 import evlog from "evlog/vite";
 import { ENV } from "varlock/env";
 
 // https://astro.build/config
 export default defineConfig({
   site: "https://dia-zero.aquariolabs.com", // TODO: replace with the correct project route
-  image: {
-    service: passthroughImageService(),
-  },
+  adapter: cloudflare({
+    prerenderEnvironment: "node",
+  }),
   integrations: [
     varlockAstroIntegration(),
     react(),
