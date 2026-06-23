@@ -10,10 +10,7 @@ const drain = ENV.POSTHOG_KEY
     })
   : undefined;
 
-initLogger({
-  env: { service: "website" },
-  ...(drain ? { drain } : {}),
-});
+initLogger(drain ? { drain } : {});
 
 export const onRequest = defineMiddleware(async ({ request, locals }, next) => {
   const url = new URL(request.url);
