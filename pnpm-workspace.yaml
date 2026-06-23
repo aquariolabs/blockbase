@@ -55,6 +55,7 @@ catalog:
   vite: npm:@voidzero-dev/vite-plus-core@0.2.1
   vitest: 4.1.9
   wrangler: ^4.102.0
+  astro-robots-txt: ^1.0.0
 
 catalogMode: prefer
 
