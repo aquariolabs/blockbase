@@ -18,6 +18,7 @@
     "@varlock/astro-integration": "catalog:",
     "@workspace/ui": "workspace:*",
     "astro": "catalog:",
+    "astro-robots-txt": "catalog:",
     "astro-seo": "catalog:",
     "astro-seo-schema": "catalog:",
     "evlog": "catalog:"

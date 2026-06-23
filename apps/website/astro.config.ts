@@ -3,16 +3,37 @@ import react from "@astrojs/react";
 import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
 import varlockAstroIntegration from "@varlock/astro-integration";
-import { defineConfig } from "astro/config";
+import robotsTxt from "astro-robots-txt";
+import { defineConfig, passthroughImageService } from "astro/config";
 import evlog from "evlog/vite";
+import { ENV } from "varlock/env";
 
+// https://astro.build/config
 export default defineConfig({
-  // TODO: replace with the correct project route
-  site: "https://dia-zero.aquariolabs.com",
-  adapter: cloudflare({
-    prerenderEnvironment: "node", // needed for varlock + astro + cloudflare integration
-  }),
-  integrations: [varlockAstroIntegration(), react(), sitemap()],
+  site: "https://dia-zero.aquariolabs.com", // TODO: replace with the correct project route
+  image: {
+    service: passthroughImageService(),
+  },
+  integrations: [
+    varlockAstroIntegration(),
+    react(),
+    sitemap(),
+    robotsTxt({
+      sitemap: true,
+      policy: [
+        {
+          userAgent: "*",
+          // The next line enables or disables the crawling on the `robots.txt` level outside of production.
+          disallow: ENV.VARLOCK_ENV === "production" ? "" : "/",
+        },
+      ],
+      transform(content) {
+        const contentSignalLine = "Content-Signal: ai-train=no, search=yes, ai-input=no";
+        if (content.includes(contentSignalLine)) return content;
+        return `${content.trimEnd()}\n${contentSignalLine}\n`;
+      },
+    }),
+  ],
   vite: {
     plugins: [
       tailwindcss(),

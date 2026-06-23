@@ -1,5 +1,0 @@
-User-agent: *
-Allow: /
-
-TODO: replace with the correct project route
-Sitemap: https://dia-zero.aquariolabs.com/sitemap-index.xml
