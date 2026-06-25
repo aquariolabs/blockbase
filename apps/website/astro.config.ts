@@ -11,9 +11,7 @@ import { ENV } from "varlock/env";
 // https://astro.build/config
 export default defineConfig({
   site: "https://dia-zero.aquariolabs.com", // TODO: replace with the correct project route
-  adapter: cloudflare({
-    prerenderEnvironment: "node", // needed for varlock + astro + cloudflare integration
-  }),
+  adapter: cloudflare(),
   integrations: [
     varlockAstroIntegration(),
     react(),
