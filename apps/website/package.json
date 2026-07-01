@@ -27,6 +27,7 @@
     "@astrojs/react": "catalog:",
     "@cloudflare/vite-plugin": "catalog:",
     "@playwright/test": "catalog:",
+    "@posthog/types": "catalog:",
     "@tailwindcss/vite": "catalog:",
     "@types/node": "catalog:",
     "@varlock/cloudflare-integration": "catalog:",
