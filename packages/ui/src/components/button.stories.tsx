@@ -7,7 +7,7 @@ import { Button } from "./button";
  * Displays a button or a component that looks like a button.
  */
 const meta = {
-  title: "ui/radix/Button",
+  title: "ui/base/Button",
   component: Button,
   tags: ["autodocs"],
   argTypes: {
@@ -26,7 +26,7 @@ const meta = {
     disabled: {
       control: "boolean",
     },
-    asChild: {
+    render: {
       table: {
         disable: true,
       },
