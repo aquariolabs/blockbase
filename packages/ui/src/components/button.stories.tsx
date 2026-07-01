@@ -1,13 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { Button } from "@workspace/ui/components/button";
 import { Loader2, Mail } from "lucide-react";
-
-import { Button } from "./button";
 
 /**
  * Displays a button or a component that looks like a button.
  */
 const meta = {
-  title: "ui/base/Button",
   component: Button,
   tags: ["autodocs"],
   argTypes: {
@@ -25,11 +23,6 @@ const meta = {
     },
     disabled: {
       control: "boolean",
-    },
-    render: {
-      table: {
-        disable: true,
-      },
     },
   },
   parameters: {
