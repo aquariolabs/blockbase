@@ -63,6 +63,7 @@ jobs:
           template_sha="$(git rev-parse --short template/main)"
           branch="chore/template-sync-${template_sha}"
           body_file="$(mktemp)"
+          original_head="$(git rev-parse HEAD)"
 
           git switch -c "${branch}"
           merge_status="clean"
@@ -84,6 +85,11 @@ jobs:
             git add -A
             git commit --no-edit
           else
+            if git diff --quiet "${original_head}" HEAD; then
+              echo "Template merge produced no file changes."
+              exit 0
+            fi
+
             echo "Merge aquariolabs/dia-zero@${template_sha} into ${GITHUB_REPOSITORY}." > "${body_file}"
           fi
 
