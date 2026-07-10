@@ -10,23 +10,6 @@
     "directory": "./dist",
     "binding": "ASSETS",
   },
-  // TODO: Remove these explicit SESSION KV IDs once Wrangler's auto-provisioning
-  // is idempotent for Astro-generated bindings.
-  // https://github.com/cloudflare/workers-sdk/issues/14284
-  "kv_namespaces": [
-    {
-      "binding": "SESSION",
-      "id": "546c9db2143d4badb5a46f66ebc7a900",
-    },
-  ],
-  "previews": {
-    "kv_namespaces": [
-      {
-        "binding": "SESSION",
-        "id": "1ff104f9af264581a4a48637a30e8ee4",
-      },
-    ],
-  },
   "routes": [
     {
       // TODO: replace with the correct project route
