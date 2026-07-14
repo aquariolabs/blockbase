@@ -18,7 +18,6 @@ jobs:
       - name: ⚡ Setup Vite+
         uses: voidzero-dev/setup-vp@v1
         with:
-          node-version: "24.18.0"
           cache: true
 
       - name: ⬣ Lint & type check
@@ -35,7 +34,6 @@ jobs:
       - name: ⚡ Setup Vite+
         uses: voidzero-dev/setup-vp@v1
         with:
-          node-version: "24.18.0"
           cache: true
 
       - name: 🧪 Run unit tests
@@ -53,7 +51,6 @@ jobs:
       - name: ⚡ Setup Vite+
         uses: voidzero-dev/setup-vp@v1
         with:
-          node-version: "24.18.0"
           cache: true
 
       - name: Get Playwright version
