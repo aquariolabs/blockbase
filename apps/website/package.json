@@ -39,7 +39,7 @@
     "wrangler": "catalog:"
   },
   "portless": {
-    "name": "website.dia-zero",
+    "name": "dia-zero",
     "script": "dev:app"
   }
 }
