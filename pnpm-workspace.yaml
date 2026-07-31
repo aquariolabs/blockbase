@@ -58,7 +58,12 @@ catalog:
   wrangler: ^4.110.0
   astro-robots-txt: ^1.0.0
   "@posthog/types": ^1.393.0
+  zod: ^4.4.3
   "@react-email/ui": 6.9.0
+  "@betternotify/core": 1.0.0-beta.10
+  "@betternotify/email": 1.0.0-beta.6
+  "@betternotify/cloudflare-email": 1.0.0-beta.6
+  "@betternotify/react-email": 1.0.0-beta.5
 
 catalogMode: prefer
 
