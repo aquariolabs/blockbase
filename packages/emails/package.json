@@ -1,0 +1,25 @@
+{
+  "name": "@workspace/emails",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./transactional/*": "./templates/transactional/*.tsx"
+  },
+  "scripts": {
+    "dev": "email dev --dir templates",
+    "export": "email export --dir templates --outDir out"
+  },
+  "dependencies": {
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "react-email": "catalog:"
+  },
+  "devDependencies": {
+    "@react-email/ui": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "typescript": "catalog:"
+  }
+}

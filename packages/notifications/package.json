@@ -1,0 +1,31 @@
+{
+  "name": "@workspace/notifications",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "prepare": "varlock codegen",
+    "check": "vp check"
+  },
+  "dependencies": {
+    "@betternotify/cloudflare-email": "catalog:",
+    "@betternotify/core": "catalog:",
+    "@betternotify/email": "catalog:",
+    "@betternotify/react-email": "catalog:",
+    "@workspace/emails": "workspace:*",
+    "react": "19.2.6",
+    "react-email": "6.0.0",
+    "varlock": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vite-plus": "catalog:"
+  }
+}

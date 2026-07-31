@@ -9,6 +9,7 @@ apps, packages, formatacao, lint, testes e builds.
 - `apps/storybook`: Storybook para os componentes compartilhados do template
 - `packages/ui`: pacote `@workspace/ui` com Tailwind, shadcn/ui e componentes
   React reutilizaveis
+- `packages/emails`: templates transacionais com React Email
 - `.github/workflows`: CI, testes, deploy e sincronizacao a partir do template
 
 O workspace usa catalogos do pnpm em `pnpm-workspace.yaml` para manter as
@@ -29,6 +30,7 @@ vp run ready
 ```bash
 vp run website#dev
 vp run storybook#dev
+vp run emails#dev
 ```
 
 O app `website` roda via `portless` em `https://website.dia-zero.localhost`.
@@ -36,6 +38,10 @@ Ao criar um projeto derivado, ajuste os nomes do app, do Worker, do dominio e
 do host `portless` para o novo repositorio. A configuracao do host fica no
 campo `"portless"` de `apps/website/package.json`; o task `dev` do Vite+ chama
 `portless`, que executa o script `dev:app` por tras do proxy.
+
+O preview do React Email roda em `http://localhost:3000`. Os templates ficam em
+`packages/emails/templates/transactional` e podem ser exportados com
+`vp run emails#export`.
 
 ## Validacao
 

@@ -17,6 +17,8 @@ storybook-static
 .wrangler
 worker-configuration.d.ts
 .astro
+.react-email
+out
 
 # editor directories and files
 .vscode/*
