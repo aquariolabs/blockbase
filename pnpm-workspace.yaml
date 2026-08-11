@@ -43,7 +43,7 @@ catalog:
   portless: ^0.15.5
   "@base-ui/react": ^1.7.0
   react-dom: ^19.2.8
-  react: ^19.2.7
+  react: ^19.2.8
   react-email: 6.9.0
   shadcn: ^4.16.2
   storybook: 10.5.7

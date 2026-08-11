@@ -33,6 +33,12 @@ export default defineConfig({
     }),
   ],
   vite: {
+    resolve: {
+      dedupe: ["react", "react-dom"],
+    },
+    ssr: {
+      noExternal: ["@workspace/ui", "@base-ui/react"],
+    },
     plugins: [
       tailwindcss(),
       evlog({
