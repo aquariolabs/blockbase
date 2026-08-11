@@ -38,7 +38,7 @@ catalog:
   evlog: ^2.20.0
   lucide-react: ^1.24.0
   mockdate: ^3.0.5
-  msw-storybook-addon: ^2.0.7
+  msw-storybook-addon: ^3.0.0
   msw: ^2.15.0
   portless: ^0.15.4
   "@base-ui/react": ^1.6.0
