@@ -19,8 +19,5 @@
   },
   "rtl": false,
   "menuColor": "default",
-  "menuAccent": "subtle",
-  "registries": {
-    "@storybook": "https://registry.lloydrichards.dev/v3/base/{name}.json"
-  }
+  "menuAccent": "subtle"
 }

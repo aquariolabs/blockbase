@@ -1,20 +1,19 @@
 # dia-zero
 
-Template de monorepo para projetos web, usando Vite+ como toolchain unico para
-apps, packages, formatacao, lint, testes e builds.
+Template de monorepo para projetos web, usando Vite+ como toolchain único para
+apps, packages, formatação, lint, testes e builds.
 
 ## Estrutura
 
 - `apps/website`: app Astro base, preparado para Cloudflare
-- `apps/storybook`: Storybook para os componentes compartilhados do template
 - `packages/ui`: pacote `@workspace/ui` com Tailwind, shadcn/ui e componentes
-  React reutilizaveis
+  React reutilizáveis
 - `packages/emails`: templates transacionais com React Email
-- `.github/workflows`: CI, testes, deploy e sincronizacao a partir do template
+- `.github/workflows`: CI, testes, deploy e sincronização a partir do template
 
-O workspace usa catalogos do pnpm em `pnpm-workspace.yaml` para manter as
-versoes centralizadas. O Vite+ (`vp`) e o lockfile sao a fonte da verdade para
-tooling e dependencias.
+O workspace usa catálogos do pnpm em `pnpm-workspace.yaml` para manter as
+versões centralizadas. O Vite+ (`vp`) e o lockfile são a fonte da verdade para
+tooling e dependências.
 
 ## Uso
 
@@ -29,21 +28,20 @@ vp run ready
 
 ```bash
 vp run website#dev
-vp run storybook#dev
 vp run emails#dev
 ```
 
 O app `website` roda via `portless` em `https://website.dia-zero.localhost`.
-Ao criar um projeto derivado, ajuste os nomes do app, do Worker, do dominio e
-do host `portless` para o novo repositorio. A configuracao do host fica no
+Ao criar um projeto derivado, ajuste os nomes do app, do Worker, do domínio e
+do host `portless` para o novo repositório. A configuração do host fica no
 campo `"portless"` de `apps/website/package.json`; o task `dev` do Vite+ chama
-`portless`, que executa o script `dev:app` por tras do proxy.
+`portless`, que executa o script `dev:app` por trás do proxy.
 
 O preview do React Email roda em `http://localhost:3000`. Os templates ficam em
 `packages/emails/templates/transactional` e podem ser exportados com
 `vp run emails#export`.
 
-## Validacao
+## Validação
 
 ```bash
 vp check
@@ -51,19 +49,19 @@ vp test
 vp run -r build
 ```
 
-O comando `vp run ready` executa a verificacao completa usada para preparar
-mudancas: formatacao, lint, testes e build de todos os projetos.
+O comando `vp run ready` executa a verificação completa usada para preparar
+mudanças: formatação, lint, testes e build de todos os projetos.
 
 ## Deploy
 
-As variaveis de ambiente esperadas pelo app ficam em
-`apps/website/.env.schema`.
+As variáveis de ambiente esperadas pelo app ficam em
+`.env.schema`.
 
 ## Ao criar um repo a partir deste template
 
-- renomeie o app, Worker e dominio em `apps/website/wrangler.jsonc`
+- renomeie o app, Worker e domínio em `apps/website/wrangler.jsonc`
 - ajuste `site` em `apps/website/astro.config.ts`
 - atualize o nome usado pelo `portless` em `apps/website/package.json`
 - revise secrets e variables nos workflows do GitHub
 - substitua a homepage, SEO, Schema.org e assets sociais
-- mantenha dependencias compartilhadas no catalogo do `pnpm-workspace.yaml`
+- mantenha dependências compartilhadas no catálogo do `pnpm-workspace.yaml`
