@@ -20,8 +20,6 @@
     "tw-animate-css": "catalog:"
   },
   "devDependencies": {
-    "@storybook/addon-docs": "catalog:",
-    "@storybook/react-vite": "catalog:",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",

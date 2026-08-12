@@ -1,9 +1,0 @@
-{
-  "extends": "../../tsconfig.json",
-  "compilerOptions": {
-    "jsx": "react-jsx",
-    "skipLibCheck": true,
-    "types": ["vite/client", "msw-storybook-addon/csf3"]
-  },
-  "include": [".storybook", "../../packages/ui/src/**/*.stories.tsx"]
-}
