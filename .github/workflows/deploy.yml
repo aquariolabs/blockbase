@@ -25,6 +25,7 @@ jobs:
       - name: ⚡ Setup Vite+
         uses: voidzero-dev/setup-vp@v1
         with:
+          node-version: "26.0.0"
           cache: true
 
       - name: 🏗️ Build Website
