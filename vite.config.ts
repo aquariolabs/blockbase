@@ -8,6 +8,7 @@ export default defineConfig({
     "*": "vp check --fix",
   },
   fmt: {
+    ignorePatterns: [".agents/skills/**"],
     sortImports: {},
     sortTailwindcss: {
       functions: ["clsx", "cn"],
