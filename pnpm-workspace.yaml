@@ -54,6 +54,8 @@ catalog:
   "@betternotify/email": 1.0.0-beta.6
   "@betternotify/cloudflare-email": 1.0.0-beta.6
   "@betternotify/react-email": 1.0.0-beta.5
+  oxlint: 1.78.0
+  "@oxlint/plugins": 1.78.0
 
 catalogMode: prefer
 

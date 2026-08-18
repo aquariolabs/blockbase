@@ -9,6 +9,8 @@
     "prepare": "vp config"
   },
   "devDependencies": {
+    "@oxlint/plugins": "catalog:",
+    "oxlint": "catalog:",
     "portless": "catalog:",
     "vite-plus": "catalog:"
   },
