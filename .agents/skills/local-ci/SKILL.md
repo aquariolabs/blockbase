@@ -1,10 +1,10 @@
 ---
 name: local-ci
-description: Run GitHub Actions CI locally with Local CI to validate changes before pushing. Use when testing, running checks, or validating code changes.
+description: Run GitHub Actions locally with Local CI.
 license: MIT
-compatibility: Requires Node.js 18+ and Docker
 metadata:
   author: redwoodjs
+  compatibility: Requires Node.js 18+ and Docker
   version: "1.0.0"
 ---
 
