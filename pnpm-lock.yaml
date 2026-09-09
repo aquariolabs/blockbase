@@ -218,8 +218,8 @@ catalogs:
       specifier: ^1.8.0
       version: 1.8.0
     '@betternotify/cloudflare-email':
-      specifier: 1.0.0-beta.6
-      version: 1.0.0-beta.6
+      specifier: 1.0.0-beta.7
+      version: 1.0.0-beta.7
     '@betternotify/core':
       specifier: 1.0.0-beta.10
       version: 1.0.0-beta.10
@@ -454,7 +454,7 @@ importers:
     dependencies:
       '@betternotify/cloudflare-email':
         specifier: 'catalog:'
-        version: 1.0.0-beta.6
+        version: 1.0.0-beta.7
       '@betternotify/core':
         specifier: 'catalog:'
         version: 1.0.0-beta.10
@@ -831,8 +831,8 @@ packages:
   '@better-fetch/fetch@1.1.21':
     resolution: {integrity: sha512-/ImESw0sskqlVR94jB+5+Pxjf+xBwDZF/N5+y2/q4EqD7IARUTSpPfIo8uf39SYpCxyOCtbyYpUrZ3F/k0zT4A==}
 
-  '@betternotify/cloudflare-email@1.0.0-beta.6':
-    resolution: {integrity: sha512-K4uw3kSgQGLCdWJf2rD5tqITxVXD3hb7E4qly0xcJuz3JptXH+UGiLklw56YpqcB1sR9u7m2qFRBYWPeb//HgQ==}
+  '@betternotify/cloudflare-email@1.0.0-beta.7':
+    resolution: {integrity: sha512-TsbgAyjpDwcGwZiHxdWflK9aV2fi12J7QABx5Oi+GYIbeaG1AUE6Yk37w4pM9HFIHaM/Lmw6n7lfP8/XW0cB0w==}
     engines: {node: '>=22'}
 
   '@betternotify/core@1.0.0-beta.10':
@@ -5971,9 +5971,9 @@ snapshots:
 
   '@better-fetch/fetch@1.1.21': {}
 
-  '@betternotify/cloudflare-email@1.0.0-beta.6':
+  '@betternotify/cloudflare-email@1.0.0-beta.7':
     dependencies:
-      '@betternotify/core': 1.0.0-beta.10
+      '@betternotify/core': 1.0.0-beta.11
       '@betternotify/email': 1.0.0-beta.7
 
   '@betternotify/core@1.0.0-beta.10':
