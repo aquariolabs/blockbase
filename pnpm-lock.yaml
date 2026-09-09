@@ -224,8 +224,8 @@ catalogs:
       specifier: 1.0.0-beta.10
       version: 1.0.0-beta.10
     '@betternotify/email':
-      specifier: 1.0.0-beta.6
-      version: 1.0.0-beta.6
+      specifier: 1.0.0-beta.7
+      version: 1.0.0-beta.7
     '@betternotify/react-email':
       specifier: 1.0.0-beta.5
       version: 1.0.0-beta.5
@@ -460,7 +460,7 @@ importers:
         version: 1.0.0-beta.10
       '@betternotify/email':
         specifier: 'catalog:'
-        version: 1.0.0-beta.6
+        version: 1.0.0-beta.7
       '@betternotify/react-email':
         specifier: 'catalog:'
         version: 1.0.0-beta.5(react-email@6.9.3(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(supports-color@10.2.2))(react@19.2.8)
@@ -839,8 +839,12 @@ packages:
     resolution: {integrity: sha512-LccXcvSrEjkC8kS5LdT40fI8SJKBoelMR+XtPfCZaBqut6fuP1pNZ+JaJ7uWoOyJkOzdqJT+ROt36WYLalsihw==}
     engines: {node: '>=22'}
 
-  '@betternotify/email@1.0.0-beta.6':
-    resolution: {integrity: sha512-7dD2VxKgw+hD6Hi90iBwNsbaxvuQCdhHE7OQdbXcoecDtvNL9XftqzFWGKC8BYrKL+Hq/TFQPcAp3ivpw0Diiw==}
+  '@betternotify/core@1.0.0-beta.11':
+    resolution: {integrity: sha512-AfHg5/7HiMZS2UUu+cbL/Vo/EYX+u5OW2Vja3bN015RaACjnjLpBtBnqyMujSNAQs0IqHt2e3WsmBw/VCFEdXg==}
+    engines: {node: '>=22'}
+
+  '@betternotify/email@1.0.0-beta.7':
+    resolution: {integrity: sha512-kfkPAfRoMMhMChqNNJoLrI96e6bbZjm5lQliRpBpdfex75u/bNcSCPuomGaoGvZch062WTbURaYnEhvdNkmiNQ==}
     engines: {node: '>=22'}
 
   '@betternotify/react-email@1.0.0-beta.5':
@@ -5970,22 +5974,27 @@ snapshots:
   '@betternotify/cloudflare-email@1.0.0-beta.6':
     dependencies:
       '@betternotify/core': 1.0.0-beta.10
-      '@betternotify/email': 1.0.0-beta.6
+      '@betternotify/email': 1.0.0-beta.7
 
   '@betternotify/core@1.0.0-beta.10':
     dependencies:
       '@better-fetch/fetch': 1.1.21
       '@standard-schema/spec': 1.1.0
 
-  '@betternotify/email@1.0.0-beta.6':
+  '@betternotify/core@1.0.0-beta.11':
     dependencies:
-      '@betternotify/core': 1.0.0-beta.10
+      '@better-fetch/fetch': 1.1.21
+      '@standard-schema/spec': 1.1.0
+
+  '@betternotify/email@1.0.0-beta.7':
+    dependencies:
+      '@betternotify/core': 1.0.0-beta.11
       '@standard-schema/spec': 1.1.0
 
   '@betternotify/react-email@1.0.0-beta.5(react-email@6.9.3(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(supports-color@10.2.2))(react@19.2.8)':
     dependencies:
       '@betternotify/core': 1.0.0-beta.10
-      '@betternotify/email': 1.0.0-beta.6
+      '@betternotify/email': 1.0.0-beta.7
       react: 19.2.8
       react-email: 6.9.3(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(supports-color@10.2.2)
 
