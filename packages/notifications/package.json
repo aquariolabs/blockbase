@@ -16,8 +16,8 @@
     "@betternotify/email": "catalog:",
     "@betternotify/react-email": "catalog:",
     "@workspace/emails": "workspace:*",
-    "react": "19.2.8",
-    "react-email": "6.9.3",
+    "react": "19.3.0",
+    "react-email": "6.9.5",
     "varlock": "catalog:",
     "zod": "catalog:"
   },
