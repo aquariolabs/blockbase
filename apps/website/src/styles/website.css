@@ -14,6 +14,6 @@
 @layer base {
   html {
     scroll-behavior: smooth;
-    @apply scrollbar-thin scrollbar-track-transparent scrollbar-thumb-[gray];
+    @apply scrollbar-thin scrollbar-thumb-[gray] scrollbar-track-transparent;
   }
 }
