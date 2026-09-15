@@ -44,7 +44,7 @@ catalog:
   varlock: ^1.18.0
   vite-plus: 0.3.0
   vite: npm:@voidzero-dev/vite-plus-core@0.2.8
-  vitest: 4.1.10
+  vitest: 5.0.0
   wrangler: ^4.129.0
   astro-robots-txt: ^1.0.0
   "@posthog/types": ^1.409.0
