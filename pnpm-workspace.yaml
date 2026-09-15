@@ -48,7 +48,7 @@ catalog:
   wrangler: ^4.129.0
   astro-robots-txt: ^1.0.0
   "@posthog/types": ^1.409.0
-  zod: ^4.4.3
+  zod: ^4.6.5
   "@react-email/ui": 6.9.3
   "@betternotify/core": 1.0.0-beta.11
   "@betternotify/email": 1.0.0-beta.7
