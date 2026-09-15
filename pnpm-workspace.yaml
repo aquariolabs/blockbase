@@ -19,7 +19,7 @@ catalog:
   "@fontsource-variable/inter": ^5.2.8
   "@playwright/test": ^1.62.1
   "@tailwindcss/vite": ^4.3.2
-  "@types/node": ^26.2.0
+  "@types/node": ^26.5.1
   "@types/react-dom": ^19.2.7
   "@types/react": ^19.2.18
   "@varlock/astro-integration": ^1.4.1
