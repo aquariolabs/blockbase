@@ -1,4 +1,4 @@
-# dia-zero
+# blockbase
 
 Template de monorepo para projetos web, usando Vite+ como toolchain único para
 apps, packages, formatação, lint, testes e builds.
@@ -31,7 +31,7 @@ vp run website#dev
 vp run emails#dev
 ```
 
-O app `website` roda via `portless` em `https://website.dia-zero.localhost`.
+O app `website` roda via `portless` em `https://website.blockbase.localhost`.
 Ao criar um projeto derivado, ajuste os nomes do app, do Worker, do domínio e
 do host `portless` para o novo repositório. A configuração do host fica no
 campo `"portless"` de `apps/website/package.json`; o task `dev` do Vite+ chama

@@ -9,10 +9,10 @@ export default function WelcomeEmail({ actionUrl, name }: WelcomeEmailProps) {
   return (
     <Html lang="en">
       <Head />
-      <Preview>Welcome to Dia Zero, {name}.</Preview>
+      <Preview>Welcome to Blockbase, {name}.</Preview>
       <Body style={main}>
         <Container style={container}>
-          <Heading style={heading}>Welcome to Dia Zero</Heading>
+          <Heading style={heading}>Welcome to Blockbase</Heading>
           <Text style={paragraph}>Hi {name},</Text>
           <Text style={paragraph}>Your account is ready. Use the button below to continue.</Text>
           <Section style={buttonSection}>

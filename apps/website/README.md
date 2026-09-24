@@ -1,6 +1,6 @@
 # website
 
-App Astro base do template `dia-zero`, preparado para deploy no Cloudflare.
+App Astro base do template `blockbase`, preparado para deploy no Cloudflare.
 
 ## Stack atual
 
@@ -25,7 +25,7 @@ vp run website#test:e2e
 ```
 
 O servidor local usa `portless` e fica em
-`https://website.dia-zero.localhost`. Em repos derivados, troque esse nome em
+`https://website.blockbase.localhost`. Em repos derivados, troque esse nome em
 `package.json`, no campo `"portless"`. O script `dev:app` roda o Astro
 diretamente quando for necessario bypassar o proxy.
 

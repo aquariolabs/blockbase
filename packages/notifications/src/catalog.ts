@@ -15,7 +15,7 @@ export function createMainCatalog(rpc: NotifyRootBuilder<Channels, {}>) {
           name: z.string().min(1),
         }),
       )
-      .subject(({ input }) => `Welcome to Dia Zero, ${input.name}`)
+      .subject(({ input }) => `Welcome to Blockbase, ${input.name}`)
       .template(({ input }) => reactEmail(WelcomeEmail, input, { plainText: true })),
   });
 }

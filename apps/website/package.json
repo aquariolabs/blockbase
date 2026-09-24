@@ -39,7 +39,7 @@
     "wrangler": "catalog:"
   },
   "portless": {
-    "name": "dia-zero",
+    "name": "blockbase",
     "script": "dev:app"
   }
 }
