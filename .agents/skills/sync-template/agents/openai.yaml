@@ -1,0 +1,6 @@
+interface:
+  display_name: "Sync Template"
+  short_description: "Sync Blockbase updates through a validated PR"
+  default_prompt: "Use $sync-template to sync this repository with aquariolabs/blockbase, validate the changes, create the PR, and merge it."
+policy:
+  allow_implicit_invocation: false
