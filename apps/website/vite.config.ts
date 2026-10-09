@@ -5,7 +5,7 @@ export default defineConfig({
     tasks: {
       build: {
         command: "varlock run -- astro build",
-        env: ["POSTHOG_KEY", "POSTHOG_HOST"],
+        cache: { env: ["POSTHOG_KEY", "POSTHOG_HOST"] },
       },
     },
   },
