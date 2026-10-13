@@ -10,6 +10,8 @@ apps, packages, formatação, lint, testes e builds.
   React reutilizáveis
 - `packages/emails`: templates transacionais com React Email
 - `.github/workflows`: CI, testes, deploy e sincronização a partir do template
+- `.claude`: prepara as sessões cloud do Claude Code, instalando o Vite+, o
+  Node.js do projeto e as dependências quando a sessão começa
 
 O workspace usa catálogos do pnpm em `pnpm-workspace.yaml` para manter as
 versões centralizadas. O Vite+ (`vp`) e o lockfile são a fonte da verdade para
