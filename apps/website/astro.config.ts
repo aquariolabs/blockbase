@@ -8,7 +8,7 @@ import { defineConfig } from "astro/config";
 import evlog from "evlog/vite";
 import { ENV } from "varlock/env";
 
-// https://astro.build/config
+/** https://astro.build/config */
 export default defineConfig({
   site: "https://blockbase.aquariolabs.com", // TODO: replace with the correct project route
   adapter: cloudflare(),
