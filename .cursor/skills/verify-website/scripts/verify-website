@@ -1,0 +1,798 @@
+#!/usr/bin/env node
+
+import { execFileSync, spawn } from "node:child_process";
+import fs from "node:fs";
+import net from "node:net";
+import path from "node:path";
+import { createRequire } from "node:module";
+import { fileURLToPath } from "node:url";
+
+const scriptDir = path.dirname(fileURLToPath(import.meta.url));
+const repoRoot = path.resolve(scriptDir, "../../../..");
+const websiteDir = path.join(repoRoot, "apps", "website");
+const evidenceRoot = path.join(repoRoot, ".cursor", "skills", "verify-website", "evidence");
+const varlockBin = path.join(websiteDir, "node_modules", ".bin", "varlock");
+
+const EXPECTED_ROBOTS = [
+  "User-agent: *",
+  "Disallow: /",
+  "Sitemap: https://blockbase.aquariolabs.com/sitemap-index.xml",
+  "Content-Signal: ai-train=no, search=yes, ai-input=no",
+  "",
+].join("\n");
+
+const HOME_BUTTON = "Button from @workspace/ui";
+
+function fail(message) {
+  console.error(message);
+  process.exit(1);
+}
+
+function assertNode() {
+  const major = Number(process.versions.node.split(".")[0]);
+  if (major < 26) {
+    fail(`Node ${process.versions.node} is too old. website requires Node >= 26.`);
+  }
+}
+
+function assertRepo() {
+  const pkgPath = path.join(repoRoot, "package.json");
+  if (!fs.existsSync(pkgPath)) fail(`Repo root not found from ${scriptDir}`);
+  const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf8"));
+  if (pkg.name !== "blockbase") fail(`Expected package name blockbase, found ${pkg.name}`);
+  if (!fs.existsSync(varlockBin)) {
+    fail("varlock is missing. From the repo root run: vp install");
+  }
+}
+
+function runId() {
+  const id = process.env.VERIFY_WEBSITE_RUN_ID || "";
+  if (!/^[a-z0-9][a-z0-9-]{0,63}$/.test(id)) {
+    fail("Set VERIFY_WEBSITE_RUN_ID to a lowercase id, for example missing-page-proof.");
+  }
+  return id;
+}
+
+function scratchDir(id = runId()) {
+  return path.join("/tmp", `verify-website-${id}`);
+}
+
+function evidenceDir(id = runId()) {
+  return path.join(evidenceRoot, id);
+}
+
+function statePath(id = runId()) {
+  return path.join(scratchDir(id), "state.json");
+}
+
+function readState() {
+  const file = statePath();
+  if (!fs.existsSync(file)) fail(`No instance for ${runId()}. Run launch first.`);
+  return JSON.parse(fs.readFileSync(file, "utf8"));
+}
+
+function writeState(state) {
+  fs.mkdirSync(scratchDir(state.runId), { recursive: true });
+  fs.writeFileSync(statePath(state.runId), `${JSON.stringify(state, null, 2)}\n`);
+}
+
+function parseArgs(argv) {
+  const positional = [];
+  const flags = {};
+  for (let i = 0; i < argv.length; i += 1) {
+    const arg = argv[i];
+    if (!arg.startsWith("--")) {
+      positional.push(arg);
+      continue;
+    }
+    const key = arg.slice(2);
+    const next = argv[i + 1];
+    if (next === undefined || next.startsWith("--")) {
+      flags[key] = true;
+    } else {
+      flags[key] = next;
+      i += 1;
+    }
+  }
+  return { positional, flags };
+}
+
+function childEnv(port) {
+  const env = { ...process.env };
+  env.VARLOCK_ENV = "test";
+  env.ASTRO_TELEMETRY_DISABLED = "1";
+  env.HOST = "127.0.0.1";
+  if (port) env.PORT = String(port);
+  delete env.POSTHOG_KEY;
+  delete env.CLOUDFLARE_API_TOKEN;
+  delete env.CLOUDFLARE_ACCOUNT_ID;
+  delete env.CLOUDFLARE_EMAIL_API_TOKEN;
+  const bins = [
+    path.join(websiteDir, "node_modules", ".bin"),
+    path.join(repoRoot, "node_modules", ".bin"),
+  ].join(":");
+  env.PATH = `${bins}:${env.PATH || ""}`;
+  return env;
+}
+
+function stripAnsi(text) {
+  return text.replace(/\u001b\[[0-9;]*m/g, "");
+}
+
+function sleep(ms) {
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+}
+
+function isAlive(pid) {
+  if (!pid) return false;
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function processGroup(pid) {
+  const stat = fs.readFileSync(`/proc/${pid}/stat`, "utf8");
+  const rest = stat.slice(stat.lastIndexOf(")") + 2).split(" ");
+  return Number(rest[2]);
+}
+
+function envValue(pid, key) {
+  const raw = fs.readFileSync(`/proc/${pid}/environ`);
+  const parts = raw.toString("utf8").split("\0");
+  const prefix = `${key}=`;
+  const found = parts.find((item) => item.startsWith(prefix));
+  return found ? found.slice(prefix.length) : "";
+}
+
+function portFree(port) {
+  return new Promise((resolve) => {
+    const server = net.createServer();
+    server.once("error", () => resolve(false));
+    server.listen(port, "127.0.0.1", () => {
+      server.close(() => resolve(true));
+    });
+  });
+}
+
+async function choosePort() {
+  if (process.env.VERIFY_WEBSITE_PORT) {
+    const port = Number(process.env.VERIFY_WEBSITE_PORT);
+    if (!Number.isInteger(port) || port < 1 || port > 65535) fail("VERIFY_WEBSITE_PORT is not a port number.");
+    if (!(await portFree(port))) fail(`Port ${port} is already in use. Refusing to attach to it.`);
+    return port;
+  }
+  for (let port = 4321; port <= 4420; port += 1) {
+    if (await portFree(port)) return port;
+  }
+  fail("No free port between 4321 and 4420.");
+}
+
+async function fetchUrl(url) {
+  const response = await fetch(url, { signal: AbortSignal.timeout(10000) });
+  const bytes = Buffer.from(await response.arrayBuffer());
+  return {
+    status: response.status,
+    contentType: response.headers.get("content-type") || "",
+    bytes,
+    text: bytes.toString("utf8"),
+  };
+}
+
+function homepageReady(result) {
+  return (
+    result.status === 200 &&
+    result.text.includes(`<title>Blockbase</title>`) &&
+    result.text.includes(HOME_BUTTON) &&
+    result.text.includes("</html>") &&
+    result.text.includes("const apiKey = undefined")
+  );
+}
+
+function distRobotsPath() {
+  return path.join(websiteDir, "dist", "client", "robots.txt");
+}
+
+function assertPreviewBuild() {
+  const robotsPath = distRobotsPath();
+  if (!fs.existsSync(robotsPath)) {
+    fail("apps/website/dist/client/robots.txt is missing. Run: verify-website build");
+  }
+  const robots = fs.readFileSync(robotsPath, "utf8");
+  if (robots !== EXPECTED_ROBOTS) {
+    fail(
+      "dist/client/robots.txt is not the VARLOCK_ENV=test crawl file. Run: verify-website build",
+    );
+  }
+  for (const name of ["index.html", "sitemap-index.xml", "sitemap-0.xml"]) {
+    const file = path.join(websiteDir, "dist", "client", name);
+    if (!fs.existsSync(file)) fail(`Missing build output apps/website/dist/client/${name}`);
+  }
+}
+
+function killGroup(pid) {
+  if (!isAlive(pid)) return;
+  const group = processGroup(pid);
+  try {
+    process.kill(-group, "SIGTERM");
+  } catch {
+    try {
+      process.kill(pid, "SIGTERM");
+    } catch {
+      // already gone
+    }
+  }
+  const deadline = Date.now() + 5000;
+  while (isAlive(pid) && Date.now() < deadline) sleep(100);
+  if (isAlive(pid)) {
+    try {
+      process.kill(-group, "SIGKILL");
+    } catch {
+      try {
+        process.kill(pid, "SIGKILL");
+      } catch {
+        // already gone
+      }
+    }
+  }
+}
+
+function listeners(port) {
+  let output = "";
+  try {
+    output = execFileSync("lsof", ["-nP", `-iTCP:${port}`, "-sTCP:LISTEN"], { encoding: "utf8" });
+  } catch {
+    return [];
+  }
+  const found = [];
+  for (const line of output.split("\n").slice(1)) {
+    if (!line.trim()) continue;
+    const cols = line.trim().split(/\s+/);
+    const pid = Number(cols[1]);
+    const name = cols.find((col) => col.includes(`:${port}`)) || "";
+    if (pid) found.push({ pid, name });
+  }
+  return found;
+}
+
+function isDescendant(pid, ancestor) {
+  const seen = new Set();
+  let current = pid;
+  while (current > 1 && !seen.has(current)) {
+    if (current === ancestor) return true;
+    seen.add(current);
+    const stat = fs.readFileSync(`/proc/${current}/stat`, "utf8");
+    const rest = stat.slice(stat.lastIndexOf(")") + 2).split(" ");
+    current = Number(rest[1]);
+  }
+  return false;
+}
+
+function evidenceFile(relativePath) {
+  if (!relativePath || typeof relativePath !== "string") fail("A relative evidence path is required.");
+  if (path.isAbsolute(relativePath) || relativePath.split(/[\\/]/).includes("..")) {
+    fail(`Evidence path must stay inside the run evidence directory: ${relativePath}`);
+  }
+  const file = path.resolve(evidenceDir(), relativePath);
+  const root = evidenceDir();
+  if (file !== root && !file.startsWith(`${root}${path.sep}`)) {
+    fail(`Evidence path escapes the run directory: ${relativePath}`);
+  }
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  return file;
+}
+
+function requireFeature(flags) {
+  const feature = flags.feature;
+  if (typeof feature !== "string" || !/^[a-z0-9][a-z0-9-]{0,63}$/.test(feature)) {
+    fail("Pass --feature with a lowercase id from the feature map, for example missing-open.");
+  }
+  return feature;
+}
+
+function captionFor(state, feature) {
+  return [
+    `feature: ${feature}`,
+    `entry: ${state.lastEntry || "none"}`,
+    `url: ${state.url}${state.currentPath || ""}`,
+    `status: ${state.lastStatus ?? ""}`,
+    `title: ${state.lastTitle || ""}`,
+    "",
+  ].join("\n");
+}
+
+function loadPlaywright() {
+  const require = createRequire(path.join(websiteDir, "package.json"));
+  try {
+    return require("@playwright/test");
+  } catch (error) {
+    fail(`Cannot load @playwright/test (${error.message}). From the repo root run: vp install`);
+  }
+}
+
+async function withPage(state, callback) {
+  const { chromium } = loadPlaywright();
+  let browser;
+  try {
+    browser = await chromium.launch({ headless: true });
+  } catch (error) {
+    fail(
+      `${error.message}\nInstall the browser with: cd apps/website && pnpm exec playwright install chromium`,
+    );
+  }
+  const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+  try {
+    return await callback(page);
+  } finally {
+    await browser.close();
+  }
+}
+
+async function openPath(page, state, pathname) {
+  const response = await page.goto(`${state.url}${pathname}`, { waitUntil: "load" });
+  return {
+    status: response ? response.status() : 0,
+    title: await page.title(),
+    path: new URL(page.url()).pathname,
+  };
+}
+
+function printLines(lines) {
+  for (const line of lines) console.log(line);
+}
+
+async function launch(flags) {
+  const id = runId();
+  const mode = flags.preview ? "preview" : "dev";
+  if (fs.existsSync(statePath(id))) {
+    fail(`State already exists at ${statePath(id)}. Run cleanup before launching again.`);
+  }
+  if (mode === "preview") assertPreviewBuild();
+  const port = await choosePort();
+  const url = `http://127.0.0.1:${port}`;
+  const dir = scratchDir(id);
+  fs.mkdirSync(dir, { recursive: true });
+  fs.mkdirSync(evidenceDir(id), { recursive: true });
+  const logPath = path.join(dir, "server.log");
+  const logFd = fs.openSync(logPath, "a");
+  const args = flags.preview
+    ? ["run", "--", "astro", "preview", "--host", "127.0.0.1", "--port", String(port)]
+    : ["run", "--", "astro", "dev", "--host", "127.0.0.1", "--port", String(port)];
+  const child = spawn(varlockBin, args, {
+    cwd: websiteDir,
+    detached: true,
+    stdio: ["ignore", logFd, logFd],
+    env: childEnv(port),
+  });
+  child.unref();
+  fs.closeSync(logFd);
+  const state = {
+    runId: id,
+    mode,
+    pid: child.pid,
+    pgid: processGroup(child.pid),
+    port,
+    url,
+    logPath,
+    currentPath: null,
+    lastStatus: null,
+    lastTitle: "",
+    lastEntry: "",
+  };
+  writeState(state);
+  const deadline = Date.now() + 60000;
+  let detail = "waiting for the server log";
+  while (Date.now() < deadline) {
+    if (!isAlive(child.pid)) {
+      const log = fs.existsSync(logPath) ? fs.readFileSync(logPath, "utf8") : "";
+      killGroup(child.pid);
+      fail(`Server exited before it was usable.\n${stripAnsi(log).slice(-2000)}`);
+    }
+    const log = stripAnsi(fs.existsSync(logPath) ? fs.readFileSync(logPath, "utf8") : "");
+    const devReady = /astro\s+v7\.3\.8 ready in/.test(log);
+    const previewReady = log.includes(`Local    ${url}/`);
+    if ((mode === "dev" && devReady) || (mode === "preview" && previewReady)) {
+      try {
+        const home = await fetchUrl(`${url}/`);
+        if (!homepageReady(home)) {
+          detail = `homepage status ${home.status}, complete ${home.text.includes("</html>")}, button ${home.text.includes(HOME_BUTTON)}`;
+        } else if (mode === "preview") {
+          const robots = await fetchUrl(`${url}/robots.txt`);
+          if (robots.status !== 200 || robots.text !== EXPECTED_ROBOTS) {
+            detail = `robots.txt status ${robots.status}`;
+          } else {
+            state.readyLine = (log.match(/astro\s+v[\d.]+ ready in[^\n]*/) || [`Local    ${url}/`])[0];
+            writeState(state);
+            printLines([
+              "ok: yes",
+              `runId: ${id}`,
+              `mode: ${mode}`,
+              `url: ${url}`,
+              `pid: ${state.pid}`,
+              `ready: ${state.readyLine}`,
+              `evidence: ${evidenceDir(id)}`,
+              `scratch: ${dir}`,
+            ]);
+            return;
+          }
+        } else {
+          state.readyLine = log.match(/astro\s+v7\.3\.8 ready in[^\n]*/)[0];
+          writeState(state);
+          printLines([
+            "ok: yes",
+            `runId: ${id}`,
+            `mode: ${mode}`,
+            `url: ${url}`,
+            `pid: ${state.pid}`,
+            `ready: ${state.readyLine}`,
+            `evidence: ${evidenceDir(id)}`,
+            `scratch: ${dir}`,
+          ]);
+          return;
+        }
+      } catch (error) {
+        detail = error.message;
+      }
+    }
+    sleep(300);
+  }
+  killGroup(child.pid);
+  fail(`Server was not usable within 60s (${detail}). Log: ${logPath}`);
+}
+
+async function doctor() {
+  const state = readState();
+  const problems = [];
+  if (!isAlive(state.pid)) problems.push(`pid ${state.pid} is not running`);
+  if (isAlive(state.pid) && envValue(state.pid, "VARLOCK_ENV") !== "test") {
+    problems.push("VARLOCK_ENV is not test");
+  }
+  if (isAlive(state.pid) && envValue(state.pid, "POSTHOG_KEY")) {
+    problems.push("POSTHOG_KEY is set on the server process");
+  }
+  const listening = listeners(state.port).filter((item) => item.name.endsWith(`:${state.port}`));
+  const ours = listening.filter((item) => isDescendant(item.pid, state.pid));
+  if (ours.length !== 1) {
+    problems.push(`expected one listener owned by pid ${state.pid} on ${state.port}, found ${listening.length}`);
+  } else if (!ours[0].name.includes(`127.0.0.1:${state.port}`)) {
+    problems.push(`listener is ${ours[0].name}, expected 127.0.0.1:${state.port}`);
+  }
+  const log = stripAnsi(fs.existsSync(state.logPath) ? fs.readFileSync(state.logPath, "utf8") : "");
+  if (state.mode === "dev" && !/astro\s+v7\.3\.8 ready in/.test(log)) {
+    problems.push("dev log does not contain astro v7.3.8 ready");
+  }
+  if (state.mode === "preview" && !log.includes(`Local    ${state.url}/`)) {
+    problems.push("preview log does not contain the instance URL");
+  }
+  let home;
+  try {
+    home = await fetchUrl(`${state.url}/`);
+    if (!homepageReady(home)) problems.push("homepage is not a complete Blockbase document with the shared button");
+  } catch (error) {
+    problems.push(`homepage request failed: ${error.message}`);
+  }
+  if (state.mode === "preview") {
+    try {
+      const robots = await fetchUrl(`${state.url}/robots.txt`);
+      if (robots.status !== 200 || robots.text !== EXPECTED_ROBOTS) {
+        problems.push("preview /robots.txt is not the test crawl file");
+      }
+    } catch (error) {
+      problems.push(`robots.txt request failed: ${error.message}`);
+    }
+  }
+  if (problems.length) {
+    console.log("ok: no");
+    for (const problem of problems) console.log(`error: ${problem}`);
+    process.exit(1);
+  }
+  printLines([
+    "ok: yes",
+    `runId: ${state.runId}`,
+    `mode: ${state.mode}`,
+    `url: ${state.url}`,
+    `pid: ${state.pid}`,
+    `listenerPid: ${ours[0].pid}`,
+    `varlockEnv: test`,
+    "homepage: complete",
+    "analyticsKey: unset",
+    `ready: ${state.readyLine || ""}`,
+    `evidence: ${evidenceDir(state.runId)}`,
+  ]);
+}
+
+function build() {
+  assertRepo();
+  const child = spawn(varlockBin, ["run", "--", "astro", "build"], {
+    cwd: websiteDir,
+    stdio: "inherit",
+    env: childEnv(),
+  });
+  child.on("exit", (code) => {
+    if (code !== 0) process.exit(code || 1);
+    assertPreviewBuild();
+    printLines([
+      "ok: yes",
+      `robots: ${distRobotsPath()}`,
+      `sitemap: ${path.join(websiteDir, "dist", "client", "sitemap-index.xml")}`,
+    ]);
+  });
+}
+
+function cleanup() {
+  const id = runId();
+  const file = statePath(id);
+  if (!fs.existsSync(file)) {
+    console.log("instance: none");
+    console.log(`evidence: ${evidenceDir(id)}`);
+    return;
+  }
+  const state = JSON.parse(fs.readFileSync(file, "utf8"));
+  killGroup(state.pid);
+  fs.rmSync(scratchDir(id), { recursive: true, force: true });
+  console.log("instance: removed");
+  console.log(`scratch: removed ${scratchDir(id)}`);
+  console.log(`evidence: ${evidenceDir(id)}`);
+}
+
+async function httpCommand(pathname, flags) {
+  const feature = requireFeature(flags);
+  const state = readState();
+  if (!pathname || !pathname.startsWith("/")) fail("http requires a path that starts with /");
+  const result = await fetchUrl(`${state.url}${pathname}`);
+  const lines = [
+    `feature: ${feature}`,
+    `status: ${result.status}`,
+    `content-type: ${result.contentType}`,
+    `bytes: ${result.bytes.length}`,
+  ];
+  if (flags.out) {
+    const file = evidenceFile(flags.out);
+    fs.writeFileSync(file, result.bytes);
+    const caption = evidenceFile(`${flags.out}.caption.txt`);
+    fs.writeFileSync(
+      caption,
+      captionFor({ ...state, lastEntry: `http ${pathname}`, lastStatus: result.status, currentPath: pathname }, feature),
+    );
+    lines.push(`wrote: ${file}`);
+    lines.push(`caption: ${caption}`);
+  }
+  const printable =
+    result.contentType.startsWith("text/") ||
+    result.contentType.includes("json") ||
+    result.contentType.includes("xml") ||
+    result.bytes.length <= 2000;
+  if (printable && !result.bytes.includes(0)) {
+    lines.push("---");
+    lines.push(result.text);
+  }
+  printLines(lines);
+}
+
+async function browserGoto(pathname, flags) {
+  const feature = requireFeature(flags);
+  const state = readState();
+  if (!pathname || !pathname.startsWith("/")) fail("goto requires a path that starts with /");
+  const requests = [];
+  await withPage(state, async (page) => {
+    if (flags.requests) {
+      page.on("request", (request) => requests.push(request.url()));
+    }
+    const opened = await openPath(page, state, pathname);
+    state.currentPath = opened.path;
+    state.lastStatus = opened.status;
+    state.lastTitle = opened.title;
+    state.lastEntry = `browser goto ${pathname}`;
+  });
+  writeState(state);
+  const lines = [
+    `feature: ${feature}`,
+    `status: ${state.lastStatus}`,
+    `title: ${state.lastTitle}`,
+    `url: ${state.currentPath}`,
+  ];
+  if (flags.requests) {
+    const file = evidenceFile(flags.requests);
+    fs.writeFileSync(file, `${requests.join("\n")}\n`);
+    const caption = evidenceFile(`${flags.requests}.caption.txt`);
+    fs.writeFileSync(caption, captionFor(state, feature));
+    lines.push(`requests: ${file}`);
+  }
+  printLines(lines);
+}
+
+async function browserClick(flags) {
+  const feature = requireFeature(flags);
+  const state = readState();
+  if (!state.currentPath) fail("No page is open. Run browser goto first.");
+  const role = flags.role;
+  const name = flags.name;
+  if (typeof role !== "string" || typeof name !== "string") {
+    fail("click requires --role and --name");
+  }
+  let outcome;
+  await withPage(state, async (page) => {
+    await openPath(page, state, state.currentPath);
+    const locator = page.getByRole(role, { name, exact: true });
+    const count = await locator.count();
+    if (count !== 1) {
+      throw new Error(`Expected one ${role} named ${JSON.stringify(name)}, found ${count}`);
+    }
+    const before = new URL(page.url()).pathname;
+    let status = null;
+    page.on("response", (response) => {
+      const request = response.request();
+      if (request.isNavigationRequest() && request.frame() === page.mainFrame()) {
+        status = response.status();
+      }
+    });
+    await locator.click();
+    await page.waitForLoadState("load");
+    const after = new URL(page.url());
+    outcome = {
+      navigated: after.pathname !== before,
+      status,
+      title: await page.title(),
+      path: after.pathname,
+    };
+  });
+  state.lastEntry = `browser click ${role} ${JSON.stringify(name)}`;
+  state.currentPath = outcome.path;
+  state.lastTitle = outcome.title;
+  if (outcome.navigated && outcome.status !== null) state.lastStatus = outcome.status;
+  writeState(state);
+  const lines = [
+    `feature: ${feature}`,
+    `clicked: ${role} ${JSON.stringify(name)}`,
+    `navigated: ${outcome.navigated ? "yes" : "no"}`,
+  ];
+  if (outcome.navigated) lines.push(`status: ${outcome.status}`);
+  lines.push(`title: ${outcome.title}`, `url: ${outcome.path}`);
+  printLines(lines);
+}
+
+async function browserSnapshot(flags) {
+  const feature = requireFeature(flags);
+  if (!Object.hasOwn(flags, "aria")) fail("snapshot requires --aria");
+  const state = readState();
+  if (!state.currentPath) fail("No page is open. Run browser goto first.");
+  const file = evidenceFile(flags.path);
+  let snapshot = "";
+  await withPage(state, async (page) => {
+    await openPath(page, state, state.currentPath);
+    snapshot = await page.locator("body").ariaSnapshot();
+  });
+  fs.writeFileSync(file, `${captionFor(state, feature)}\n${snapshot}\n`);
+  printLines([`feature: ${feature}`, `wrote: ${file}`]);
+}
+
+async function browserScreenshot(flags) {
+  const feature = requireFeature(flags);
+  const state = readState();
+  if (!state.currentPath) fail("No page is open. Run browser goto first.");
+  const file = evidenceFile(flags.path);
+  const caption = evidenceFile(`${flags.path}.caption.txt`);
+  await withPage(state, async (page) => {
+    await openPath(page, state, state.currentPath);
+    await page.screenshot({ path: file, fullPage: true });
+  });
+  fs.writeFileSync(caption, captionFor(state, feature));
+  printLines([`feature: ${feature}`, `wrote: ${file}`, `caption: ${caption}`]);
+}
+
+async function browserHead(flags) {
+  const feature = requireFeature(flags);
+  const state = readState();
+  if (!state.currentPath) fail("No page is open. Run browser goto first.");
+  let lines = [];
+  await withPage(state, async (page) => {
+    await openPath(page, state, state.currentPath);
+    const head = await page.evaluate(() => {
+      const content = (selector) => document.querySelector(selector)?.getAttribute("content") || "";
+      const href = (selector) => document.querySelector(selector)?.getAttribute("href") || "";
+      const icons = [...document.querySelectorAll('link[rel="icon"]')].map((el) => {
+        const type = el.getAttribute("type");
+        return type ? `${el.getAttribute("href")} (${type})` : el.getAttribute("href");
+      });
+      return {
+        title: document.title,
+        lang: document.documentElement.lang,
+        description: content('meta[name="description"]'),
+        canonical: href('link[rel="canonical"]'),
+        robots: content('meta[name="robots"]'),
+        ogTitle: content('meta[property="og:title"]'),
+        ogType: content('meta[property="og:type"]'),
+        ogImage: content('meta[property="og:image"]'),
+        ogUrl: content('meta[property="og:url"]'),
+        jsonld: document.querySelector('script[type="application/ld+json"]')?.textContent || "",
+        icons,
+      };
+    });
+    lines = [
+      `feature: ${feature}`,
+      `title: ${head.title}`,
+      `lang: ${head.lang}`,
+      `description: ${head.description}`,
+      `canonical: ${head.canonical}`,
+      `robots: ${head.robots}`,
+      `og:title: ${head.ogTitle}`,
+      `og:type: ${head.ogType}`,
+      `og:image: ${head.ogImage}`,
+      `og:url: ${head.ogUrl}`,
+      ...head.icons.map((icon) => `icon: ${icon}`),
+      `jsonld: ${head.jsonld}`,
+    ];
+  });
+  if (flags.out) {
+    const file = evidenceFile(flags.out);
+    fs.writeFileSync(file, `${lines.join("\n")}\n`);
+    lines.push(`wrote: ${file}`);
+  }
+  printLines(lines);
+}
+
+function browserStatus() {
+  const state = readState();
+  if (state.lastStatus === null) fail("No navigation has been recorded. Run browser goto first.");
+  console.log(`status: ${state.lastStatus}`);
+}
+
+function browserTitle() {
+  const state = readState();
+  if (!state.lastTitle) fail("No navigation has been recorded. Run browser goto first.");
+  console.log(`title: ${state.lastTitle}`);
+}
+
+async function browser(argv) {
+  const [subcommand, ...rest] = argv;
+  const { positional, flags } = parseArgs(rest);
+  if (subcommand === "goto") return browserGoto(positional[0], flags);
+  if (subcommand === "click") return browserClick(flags);
+  if (subcommand === "snapshot") return browserSnapshot(flags);
+  if (subcommand === "screenshot") return browserScreenshot(flags);
+  if (subcommand === "head") return browserHead(flags);
+  if (subcommand === "status") return browserStatus();
+  if (subcommand === "title") return browserTitle();
+  fail("browser requires goto, click, snapshot, screenshot, head, status, or title.");
+}
+
+function usage() {
+  console.log(`Usage:
+  verify-website launch [--preview]
+  verify-website doctor
+  verify-website build
+  verify-website cleanup
+  verify-website http /path --feature <id> [--out <file>]
+  verify-website browser goto /path --feature <id> [--requests <file>]
+  verify-website browser click --role <role> --name <name> --feature <id>
+  verify-website browser snapshot --aria --feature <id> --path <file>
+  verify-website browser screenshot --feature <id> --path <file>
+  verify-website browser head --feature <id> [--out <file>]
+  verify-website browser status
+  verify-website browser title`);
+}
+
+async function main() {
+  assertNode();
+  const [command, ...rest] = process.argv.slice(2);
+  if (!command || command === "help" || command === "--help") {
+    usage();
+    return;
+  }
+  assertRepo();
+  if (command === "build") return build();
+  if (command === "launch") return launch(parseArgs(rest).flags);
+  if (command === "doctor") return doctor();
+  if (command === "cleanup") return cleanup();
+  if (command === "http") {
+    const { positional, flags } = parseArgs(rest);
+    return httpCommand(positional[0], flags);
+  }
+  if (command === "browser") return browser(rest);
+  usage();
+  fail(`Unknown command ${command}`);
+}
+
+main().catch((error) => fail(error.stack || error.message));
