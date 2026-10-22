@@ -34,7 +34,7 @@ catalog:
   portless: ^0.15.8
   "@base-ui/react": ^1.9.0
   react-dom: ^19.3.1
-  react: ^19.3.0
+  react: ^19.3.1
   react-email: 6.11.2
   shadcn: ^4.21.5
   tailwind-merge: ^3.7.0
