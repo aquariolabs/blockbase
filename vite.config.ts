@@ -33,7 +33,7 @@ export default defineConfig({
     jsPlugins: [
       { name: "vite-plus", specifier: "vite-plus/oxlint-plugin" },
       { name: "slop", specifier: "eslint-plugin-slop" },
-      "./lint/no-comments.js",
+      "./tools/lint/blockbase.js",
     ],
     rules: {
       complexity: "error",
