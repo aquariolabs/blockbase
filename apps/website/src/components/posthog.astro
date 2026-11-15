@@ -1,8 +1,6 @@
 ---
 import { ENV } from 'varlock/env';
 
-// PostHog analytics snippet for client-side tracking
-// Uses is:inline to prevent Astro from processing the script
 const apiKey = ENV.POSTHOG_KEY;
 const apiHost = ENV.POSTHOG_HOST;
 const environment = ENV.VARLOCK_ENV;

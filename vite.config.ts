@@ -20,15 +20,14 @@ export default defineConfig({
     jsPlugins: [
       { name: "vite-plus", specifier: "vite-plus/oxlint-plugin" },
       { name: "slop", specifier: "eslint-plugin-slop" },
+      "./lint/no-comments.js",
     ],
     rules: {
       complexity: "error",
       "vite-plus/prefer-vite-plus-imports": "error",
+      "blockbase/no-comments": "error",
       "slop/no-em-dash": "error",
       "slop/no-trivial-functions": "error",
-      "slop/max-comment-length": "error",
-      "slop/no-jargon": "error",
-      "slop/prefer-jsdoc": "error",
       "slop/no-trivial-type-aliases": "error",
       "slop/no-static-only-class": "error",
       "slop/no-chained-type-assertions": "error",

@@ -8,9 +8,8 @@ import { defineConfig } from "astro/config";
 import evlog from "evlog/vite";
 import { ENV } from "varlock/env";
 
-/** https://astro.build/config */
 export default defineConfig({
-  site: "https://blockbase.aquariolabs.com", // TODO: replace with the correct project route
+  site: "https://blockbase.aquariolabs.com",
   adapter: cloudflare(),
   integrations: [
     varlockAstroIntegration(),
@@ -21,7 +20,6 @@ export default defineConfig({
       policy: [
         {
           userAgent: "*",
-          // The next line enables or disables the crawling on the `robots.txt` level outside of production.
           disallow: ENV.VARLOCK_ENV === "production" ? "" : "/",
         },
       ],
