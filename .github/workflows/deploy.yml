@@ -21,8 +21,7 @@ jobs:
     runs-on: blacksmith-4vcpu-ubuntu-2404
     environment:
       name: ${{ github.ref == 'refs/heads/main' && 'production' || 'preview' }}
-      # Previews only: `wrangler deploy` reports no URL for a custom domain.
-      url: ${{ steps.versions-upload.outputs.pages-deployment-alias-url }}
+      url: ${{ github.ref == 'refs/heads/main' && steps.deploy.outputs.pages-deployment-alias-url || steps.versions-upload.outputs.pages-deployment-alias-url }}
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@v7
