@@ -48,14 +48,22 @@ const noComments = defineRule({
     type: "suggestion",
     docs: {
       description:
-        "Disallow code comments, except tool directives and JSDoc on top-level declarations and members.",
+        "Disallow code comments, except tool directives. With allowJSDoc, JSDoc on top-level declarations and members is allowed too.",
     },
+    schema: [
+      {
+        type: "object",
+        properties: { allowJSDoc: { type: "boolean" } },
+        additionalProperties: false,
+      },
+    ],
     messages: {
       noComments:
-        "Comments are not allowed. Express the intent through names, types, and tests instead. JSDoc is allowed only directly above a top-level declaration or a member.",
+        "Comments are not allowed. Express the intent through names, types, and tests instead.",
     },
   },
   create(context) {
+    const allowJSDoc = context.options[0]?.allowJSDoc === true;
     const documentableStarts = new Set();
     const collect = (node) => documentableStarts.add(startOf(node));
     const memberVisitors = Object.fromEntries(MEMBERS.map((type) => [type, collect]));
@@ -77,7 +85,7 @@ const noComments = defineRule({
       "Program:exit"() {
         for (const comment of context.sourceCode.getAllComments()) {
           if (isDirective(comment)) continue;
-          if (isJSDoc(comment) && documents(comment)) continue;
+          if (allowJSDoc && isJSDoc(comment) && documents(comment)) continue;
           context.report({ loc: comment.loc, messageId: "noComments" });
         }
       },
