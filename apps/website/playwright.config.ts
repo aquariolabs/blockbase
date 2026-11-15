@@ -22,7 +22,7 @@ export default defineConfig({
   webServer: {
     // CI tests the built Worker; `astro dev` flakes while Vite optimizes deps.
     command: process.env.CI
-      ? "vp run build && wrangler dev --ip 127.0.0.1 --port 4321"
+      ? "varlock run -- astro build && wrangler dev --ip 127.0.0.1 --port 4321"
       : "varlock run -- astro dev",
     stdout: "pipe",
     port: 4321,

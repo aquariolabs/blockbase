@@ -44,7 +44,7 @@ jobs:
       - name: 🚦 Run unit tests
         run: vp run test
 
-      # Every package's build; the E2E tests below reuse the website's.
+      # Every package's build, so a template or page that breaks fails here.
       - name: 🏗️ Build
         run: vp run -r build
 
