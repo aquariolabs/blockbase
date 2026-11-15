@@ -1,5 +1,18 @@
 import { defineConfig } from "vite-plus";
 
+const generated = [
+  "!**/dist",
+  "!**/dist/**",
+  "!**/out",
+  "!**/out/**",
+  "!**/.wrangler",
+  "!**/.wrangler/**",
+  "!**/playwright-report",
+  "!**/playwright-report/**",
+  "!**/test-results",
+  "!**/test-results/**",
+];
+
 export default defineConfig({
   test: {
     projects: ["packages/*", "apps/*"],
@@ -20,15 +33,14 @@ export default defineConfig({
     jsPlugins: [
       { name: "vite-plus", specifier: "vite-plus/oxlint-plugin" },
       { name: "slop", specifier: "eslint-plugin-slop" },
+      "./tools/lint/blockbase.ts",
     ],
     rules: {
       complexity: "error",
       "vite-plus/prefer-vite-plus-imports": "error",
+      "blockbase/no-comments": "error",
       "slop/no-em-dash": "error",
       "slop/no-trivial-functions": "error",
-      "slop/max-comment-length": "error",
-      "slop/no-jargon": "error",
-      "slop/prefer-jsdoc": "error",
       "slop/no-trivial-type-aliases": "error",
       "slop/no-static-only-class": "error",
       "slop/no-chained-type-assertions": "error",
@@ -37,5 +49,15 @@ export default defineConfig({
   },
   run: {
     cache: true,
+    tasks: {
+      check: {
+        command: "vp check",
+        cache: { env: ["VARLOCK_ENV"], input: [{ auto: true }, ...generated] },
+      },
+      test: {
+        command: "vp test",
+        cache: { env: ["VARLOCK_ENV"], input: [{ auto: true }, ...generated] },
+      },
+    },
   },
 });

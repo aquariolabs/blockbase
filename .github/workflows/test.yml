@@ -6,88 +6,68 @@ on:
 env:
   VARLOCK_ENV: "test"
 
-  # Test each aspect of the application
+permissions:
+  contents: read
+
 jobs:
-  static-test:
-    name: 🔬 Static tests
+  # All checks in one job, one step each: every job pays for a runner, a
+  # checkout and installing the workspace.
+  test:
+    name: 🧪 Tests
     runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@v7
 
+      # No `cache`: restoring the package store takes as long as downloading
+      # the packages, and saving it adds time to the job.
       - name: ⚡ Setup Vite+
-        uses: voidzero-dev/setup-vp@v1
+        uses: voidzero-dev/setup-vp@250f29ce396baf5e8f24498e17c0dfdebabc26eb # v1.15.0
         with:
           node-version: "26.12.1"
-          cache: true
+          cache: false
 
-      - name: ⬣ Lint & type check
-        run: vp lint
-
-  unit-test:
-    needs: [static-test]
-    name: 🚦 Unit test
-    runs-on: blacksmith-4vcpu-ubuntu-2404
-    steps:
-      - name: ⬇️ Checkout repo
-        uses: actions/checkout@v7
-
-      - name: ⚡ Setup Vite+
-        uses: voidzero-dev/setup-vp@v1
+      # Vite+'s task cache (`run.tasks` in `vite.config.ts`): a check whose
+      # files didn't change since a run that passed it replays its output.
+      # This branch's last run, or main's.
+      - name: 📦 Restore the task cache
+        id: task-cache
+        uses: actions/cache/restore@v6
         with:
-          node-version: "26.12.1"
-          cache: true
+          path: node_modules/.vite/task-cache
+          key: vite-task-${{ runner.os }}-${{ runner.arch }}-${{ github.job }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: vite-task-${{ runner.os }}-${{ runner.arch }}-${{ github.job }}-
 
-      - name: 🧪 Run unit tests
-        run: vp test
+      - name: ⬣ Format, lint & type check
+        run: vp run check
 
-  test-e2e:
-    needs: [static-test]
-    name: 🚥 E2E tests
-    timeout-minutes: 5
-    runs-on: blacksmith-4vcpu-ubuntu-2404
-    steps:
-      - name: ⬇️ Checkout repo
-        uses: actions/checkout@v7
+      - name: 🚦 Run unit tests
+        run: vp run test
 
-      - name: ⚡ Setup Vite+
-        uses: voidzero-dev/setup-vp@v1
-        with:
-          node-version: "26.12.1"
-          cache: true
+      # Every package's build, so a template or page that breaks fails here.
+      - name: 🏗️ Build
+        run: vp run -r build
 
-      - name: Get Playwright version
-        id: playwright-version
-        run: |
-          VERSION=$(vp ls --recursive --depth 0 --json | node -e "
-            const data = JSON.parse(require('fs').readFileSync(0, 'utf-8'));
-            const pkg = data.find(p => p.devDependencies?.['@playwright/test'] || p.dependencies?.['@playwright/test']);
-            const version = pkg?.devDependencies?.['@playwright/test']?.version || pkg?.dependencies?.['@playwright/test']?.version;
-            console.log(version || 'unknown');
-          ")
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-
-      - name: Cache Playwright Browsers
-        id: cache-playwright
-        uses: actions/cache@v6
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ steps.playwright-version.outputs.version }}
-
-      - name: Install Playwright Browsers
-        if: steps.cache-playwright.outputs.cache-hit != 'true'
-        run: vp run setup:playwright
-
-      - name: Install Playwright OS Dependencies Only
-        if: steps.cache-playwright.outputs.cache-hit == 'true'
-        run: vp run website#playwright install-deps
+      # CI runs Chromium headless, which needs only its headless shell. Never
+      # from the task cache: a replay installs nothing on a fresh runner.
+      - name: 🎭 Install Playwright's Chromium and OS dependencies
+        run: vp run --no-cache setup:playwright --only-shell
 
       - name: 🎭 Run Playwright tests
+        timeout-minutes: 10
         run: vp run -r test:e2e
 
       - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:
           name: playwright-report
-          path: playwright-report/
+          path: apps/website/playwright-report/
           retention-days: 30
+
+      # Also when a step failed: only the checks that passed are kept.
+      - name: 📦 Save the task cache
+        if: ${{ !cancelled() }}
+        uses: actions/cache/save@v6
+        with:
+          path: node_modules/.vite/task-cache
+          key: ${{ steps.task-cache.outputs.cache-primary-key }}

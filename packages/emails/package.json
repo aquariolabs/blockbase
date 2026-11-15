@@ -7,8 +7,7 @@
     "./transactional/*": "./templates/transactional/*.tsx"
   },
   "scripts": {
-    "dev": "email dev --dir templates",
-    "export": "email export --dir templates --outDir out"
+    "dev": "email dev --dir templates"
   },
   "dependencies": {
     "react": "catalog:",

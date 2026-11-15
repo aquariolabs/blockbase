@@ -7,7 +7,7 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
-  reporter: "html",
+  reporter: process.env.CI ? [["github"], ["html", { open: "never" }]] : "html",
   use: {
     baseURL: "http://localhost:4321",
     trace: "on-first-retry",
@@ -20,9 +20,12 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "varlock run -- astro dev",
+    command: process.env.CI
+      ? "varlock run -- astro build && wrangler dev --ip 127.0.0.1 --port 4321"
+      : "varlock run -- astro dev",
     stdout: "pipe",
     port: 4321,
+    timeout: 120_000,
     reuseExistingServer: !process.env.CI,
     env: {
       VARLOCK_ENV: "test",

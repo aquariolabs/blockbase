@@ -5,7 +5,10 @@ export default defineConfig({
     tasks: {
       build: {
         command: "varlock run -- astro build",
-        cache: { env: ["POSTHOG_KEY", "POSTHOG_HOST"] },
+        cache: {
+          env: ["VARLOCK_ENV", "POSTHOG_KEY", "POSTHOG_HOST"],
+          input: [{ auto: true }, "!.wrangler/**"],
+        },
       },
     },
   },

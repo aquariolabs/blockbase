@@ -9,7 +9,7 @@ apps, packages, formatação, lint, testes e builds.
 - `packages/ui`: pacote `@workspace/ui` com Tailwind, shadcn/ui e componentes
   React reutilizáveis
 - `packages/emails`: templates transacionais com React Email
-- `.github/workflows`: CI, testes, deploy e sincronização a partir do template
+- `.github/workflows`: CI, testes e deploy
 - `.claude`: prepara as sessões cloud do Claude Code, instalando o Vite+, o
   Node.js do projeto e as dependências quando a sessão começa
 
@@ -21,10 +21,17 @@ tooling e dependências.
 
 ```bash
 vp install
-vp check
-vp test
-vp run ready
+vp run check     # formatação, lint e type check
+vp run test      # testes unitários
+vp run -r build  # build de todos os pacotes
+vp run ready     # tudo acima, em sequência
 ```
+
+`check`, `test` e os `build` de cada pacote são tasks do Vite+ (`run.tasks`
+nos `vite.config.ts`) e ficam em cache: se nada mudou desde a última execução
+que passou, o resultado é reaproveitado. O CI guarda esse cache entre runs.
+Para forçar a execução, use `vp run --no-cache <task>`; para limpar, `vp cache
+clean`.
 
 ## Desenvolvimento
 

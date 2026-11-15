@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "setup:playwright": "vp run website#playwright install --with-deps",
-    "ready": "vp fmt && vp lint && vp run -r test && vp run -r build",
+    "setup:playwright": "vp run website#playwright install --with-deps chromium",
+    "ready": "vp run check && vp run test && vp run -r build",
     "prepare": "vp config"
   },
   "devDependencies": {
