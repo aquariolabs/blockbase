@@ -1,5 +1,22 @@
 import { defineConfig } from "vite-plus";
 
+/**
+ * Build output and local tool state. A check that sees a new folder here
+ * would otherwise miss the cache.
+ */
+const generated = [
+  "!**/dist",
+  "!**/dist/**",
+  "!**/out",
+  "!**/out/**",
+  "!**/.wrangler",
+  "!**/.wrangler/**",
+  "!**/playwright-report",
+  "!**/playwright-report/**",
+  "!**/test-results",
+  "!**/test-results/**",
+];
+
 export default defineConfig({
   test: {
     projects: ["packages/*", "apps/*"],
@@ -40,11 +57,11 @@ export default defineConfig({
     tasks: {
       check: {
         command: "vp check",
-        cache: { env: ["VARLOCK_ENV"] },
+        cache: { env: ["VARLOCK_ENV"], input: [{ auto: true }, ...generated] },
       },
       test: {
         command: "vp test",
-        cache: { env: ["VARLOCK_ENV"] },
+        cache: { env: ["VARLOCK_ENV"], input: [{ auto: true }, ...generated] },
       },
     },
   },
