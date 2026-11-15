@@ -1,9 +1,5 @@
 import { defineConfig } from "vite-plus";
 
-/**
- * Build output and local tool state. A check that sees a new folder here
- * would otherwise miss the cache.
- */
 const generated = [
   "!**/dist",
   "!**/dist/**",
