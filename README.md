@@ -9,7 +9,7 @@ apps, packages, formatação, lint, testes e builds.
 - `packages/ui`: pacote `@workspace/ui` com Tailwind, shadcn/ui e componentes
   React reutilizáveis
 - `packages/emails`: templates transacionais com React Email
-- `.github/workflows`: CI, testes, deploy e sincronização a partir do template
+- `.github/workflows`: CI, testes e deploy
 - `.claude`: prepara as sessões cloud do Claude Code, instalando o Vite+, o
   Node.js do projeto e as dependências quando a sessão começa
 

@@ -21,8 +21,8 @@ jobs:
           node-version: "26.12.1"
           cache: true
 
-      - name: ⬣ Lint & type check
-        run: vp lint
+      - name: ⬣ Format, lint & type check
+        run: vp check
 
   unit-test:
     needs: [static-test]
@@ -59,12 +59,7 @@ jobs:
       - name: Get Playwright version
         id: playwright-version
         run: |
-          VERSION=$(vp ls --recursive --depth 0 --json | node -e "
-            const data = JSON.parse(require('fs').readFileSync(0, 'utf-8'));
-            const pkg = data.find(p => p.devDependencies?.['@playwright/test'] || p.dependencies?.['@playwright/test']);
-            const version = pkg?.devDependencies?.['@playwright/test']?.version || pkg?.dependencies?.['@playwright/test']?.version;
-            console.log(version || 'unknown');
-          ")
+          VERSION=$(node -p "require('./apps/website/node_modules/@playwright/test/package.json').version")
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Cache Playwright Browsers
@@ -89,5 +84,5 @@ jobs:
         if: ${{ !cancelled() }}
         with:
           name: playwright-report
-          path: playwright-report/
+          path: apps/website/playwright-report/
           retention-days: 30
