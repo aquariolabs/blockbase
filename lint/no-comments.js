@@ -10,26 +10,75 @@ const DIRECTIVE_PATTERNS = [
   /^\s*[#@]__(?:PURE|NO_SIDE_EFFECTS)__\s*$/,
 ];
 
+const TOP_LEVEL_DECLARATIONS = new Set([
+  "ExportNamedDeclaration",
+  "ExportDefaultDeclaration",
+  "FunctionDeclaration",
+  "ClassDeclaration",
+  "VariableDeclaration",
+  "TSInterfaceDeclaration",
+  "TSTypeAliasDeclaration",
+  "TSEnumDeclaration",
+  "TSModuleDeclaration",
+  "TSDeclareFunction",
+]);
+
+const MEMBERS = [
+  "MethodDefinition",
+  "PropertyDefinition",
+  "AccessorProperty",
+  "TSAbstractMethodDefinition",
+  "TSAbstractPropertyDefinition",
+  "TSPropertySignature",
+  "TSMethodSignature",
+  "TSIndexSignature",
+  "TSEnumMember",
+  "Property",
+];
+
+const startOf = (node) => node.range?.[0] ?? node.start;
+const endOf = (node) => node.range?.[1] ?? node.end;
+
 const isDirective = (comment) => DIRECTIVE_PATTERNS.some((pattern) => pattern.test(comment.value));
+
+const isJSDoc = (comment) => comment.type === "Block" && comment.value.startsWith("*");
 
 const noComments = defineRule({
   meta: {
     type: "suggestion",
     docs: {
-      description: "Disallow code comments, except for tool directives.",
+      description:
+        "Disallow code comments, except tool directives and JSDoc on top-level declarations and members.",
     },
     messages: {
       noComments:
-        "Comments are not allowed. Express the intent through names, types, and tests instead.",
+        "Comments are not allowed. Express the intent through names, types, and tests instead. JSDoc is allowed only directly above a top-level declaration or a member.",
     },
   },
   create(context) {
+    const documentableStarts = new Set();
+    const collect = (node) => documentableStarts.add(startOf(node));
+    const memberVisitors = Object.fromEntries(MEMBERS.map((type) => [type, collect]));
+
+    const documents = (comment) => {
+      const { text } = context.sourceCode;
+      let cursor = endOf(comment);
+      while (cursor < text.length && /\s/.test(text[cursor])) cursor += 1;
+      return documentableStarts.has(cursor);
+    };
+
     return {
-      Program() {
+      ...memberVisitors,
+      Program(program) {
+        for (const statement of program.body) {
+          if (TOP_LEVEL_DECLARATIONS.has(statement.type)) collect(statement);
+        }
+      },
+      "Program:exit"() {
         for (const comment of context.sourceCode.getAllComments()) {
-          if (!isDirective(comment)) {
-            context.report({ loc: comment.loc, messageId: "noComments" });
-          }
+          if (isDirective(comment)) continue;
+          if (isJSDoc(comment) && documents(comment)) continue;
+          context.report({ loc: comment.loc, messageId: "noComments" });
         }
       },
     };

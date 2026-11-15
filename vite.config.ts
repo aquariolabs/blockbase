@@ -41,6 +41,8 @@ export default defineConfig({
       "blockbase/no-comments": "error",
       "slop/no-em-dash": "error",
       "slop/no-trivial-functions": "error",
+      "slop/no-jargon": "error",
+      "slop/prefer-jsdoc": "error",
       "slop/no-trivial-type-aliases": "error",
       "slop/no-static-only-class": "error",
       "slop/no-chained-type-assertions": "error",
