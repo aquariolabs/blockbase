@@ -37,5 +37,15 @@ export default defineConfig({
   },
   run: {
     cache: true,
+    tasks: {
+      check: {
+        command: "vp check",
+        cache: { env: ["VARLOCK_ENV"] },
+      },
+      test: {
+        command: "vp test",
+        cache: { env: ["VARLOCK_ENV"] },
+      },
+    },
   },
 });
