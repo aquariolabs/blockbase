@@ -1,4 +1,5 @@
 import { definePlugin, defineRule } from "vite-plus/lint/plugins";
+import type { Comment, ESTree, Node, Visitor } from "vite-plus/lint/plugins";
 
 const DIRECTIVE_PATTERNS = [
   /^\s*(?:oxlint|eslint)(?:-disable|-enable|\s)/,
@@ -36,12 +37,10 @@ const MEMBERS = [
   "Property",
 ];
 
-const startOf = (node) => node.range?.[0] ?? node.start;
-const endOf = (node) => node.range?.[1] ?? node.end;
+const isDirective = (comment: Comment) =>
+  DIRECTIVE_PATTERNS.some((pattern) => pattern.test(comment.value));
 
-const isDirective = (comment) => DIRECTIVE_PATTERNS.some((pattern) => pattern.test(comment.value));
-
-const isJSDoc = (comment) => comment.type === "Block" && comment.value.startsWith("*");
+const isJSDoc = (comment: Comment) => comment.type === "Block" && comment.value.startsWith("*");
 
 const noComments = defineRule({
   meta: {
@@ -63,21 +62,22 @@ const noComments = defineRule({
     },
   },
   create(context) {
-    const allowJSDoc = context.options[0]?.allowJSDoc === true;
-    const documentableStarts = new Set();
-    const collect = (node) => documentableStarts.add(startOf(node));
-    const memberVisitors = Object.fromEntries(MEMBERS.map((type) => [type, collect]));
+    const [options] = context.options as [{ allowJSDoc?: boolean }?];
+    const allowJSDoc = options?.allowJSDoc === true;
+    const documentableStarts = new Set<number>();
+    const collect = (node: Node) => documentableStarts.add(node.start);
+    const memberVisitors: Visitor = Object.fromEntries(MEMBERS.map((type) => [type, collect]));
 
-    const documents = (comment) => {
+    const documents = (comment: Comment) => {
       const { text } = context.sourceCode;
-      let cursor = endOf(comment);
+      let cursor = comment.end;
       while (cursor < text.length && /\s/.test(text[cursor])) cursor += 1;
       return documentableStarts.has(cursor);
     };
 
     return {
       ...memberVisitors,
-      Program(program) {
+      Program(program: ESTree.Program) {
         for (const statement of program.body) {
           if (TOP_LEVEL_DECLARATIONS.has(statement.type)) collect(statement);
         }
