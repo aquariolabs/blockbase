@@ -21,10 +21,17 @@ tooling e dependências.
 
 ```bash
 vp install
-vp check
-vp test
-vp run ready
+vp run check     # formatação, lint e type check
+vp run test      # testes unitários
+vp run -r build  # build de todos os pacotes
+vp run ready     # tudo acima, em sequência
 ```
+
+`check`, `test` e os `build` de cada pacote são tasks do Vite+ (`run.tasks`
+nos `vite.config.ts`) e ficam em cache: se nada mudou desde a última execução
+que passou, o resultado é reaproveitado. O CI guarda esse cache entre runs.
+Para forçar a execução, use `vp run --no-cache <task>`; para limpar, `vp cache
+clean`.
 
 ## Desenvolvimento
 
