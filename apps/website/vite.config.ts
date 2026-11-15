@@ -5,7 +5,12 @@ export default defineConfig({
     tasks: {
       build: {
         command: "varlock run -- astro build",
-        cache: { env: ["POSTHOG_KEY", "POSTHOG_HOST"] },
+        // VARLOCK_ENV picks the env, which changes the build (robots.txt).
+        cache: {
+          env: ["VARLOCK_ENV", "POSTHOG_KEY", "POSTHOG_HOST"],
+          // Local Wrangler state from `wrangler dev`, not a build input.
+          input: [{ auto: true }, "!.wrangler/**"],
+        },
       },
     },
   },

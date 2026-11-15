@@ -44,6 +44,10 @@ jobs:
       - name: 🚦 Run unit tests
         run: vp run test
 
+      # Every package's build; the E2E tests below reuse the website's.
+      - name: 🏗️ Build
+        run: vp run -r build
+
       # CI runs Chromium headless, which needs only its headless shell. Never
       # from the task cache: a replay installs nothing on a fresh runner.
       - name: 🎭 Install Playwright's Chromium and OS dependencies
