@@ -51,7 +51,7 @@ catalog:
   zod: ^4.6.7
   "@react-email/ui": 6.11.11
   "@betternotify/core": 1.0.0-beta.11
-  "@betternotify/email": 1.0.0-beta.7
+  "@betternotify/email": 1.0.0-beta.8
   "@betternotify/cloudflare-email": 1.0.0-beta.7
   "@betternotify/react-email": 1.0.0-beta.6
   eslint-plugin-slop: ^0.1.3
