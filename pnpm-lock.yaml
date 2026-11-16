@@ -177,8 +177,8 @@ catalogs:
       specifier: ^1.9.0
       version: 1.9.0
     '@betternotify/cloudflare-email':
-      specifier: 1.0.0-beta.7
-      version: 1.0.0-beta.7
+      specifier: 1.0.0-beta.8
+      version: 1.0.0-beta.8
     '@betternotify/core':
       specifier: 1.0.0-beta.11
       version: 1.0.0-beta.11
@@ -407,7 +407,7 @@ importers:
     dependencies:
       '@betternotify/cloudflare-email':
         specifier: 'catalog:'
-        version: 1.0.0-beta.7
+        version: 1.0.0-beta.8
       '@betternotify/core':
         specifier: 'catalog:'
         version: 1.0.0-beta.11
@@ -869,16 +869,24 @@ packages:
   '@better-fetch/fetch@1.1.21':
     resolution: {integrity: sha512-/ImESw0sskqlVR94jB+5+Pxjf+xBwDZF/N5+y2/q4EqD7IARUTSpPfIo8uf39SYpCxyOCtbyYpUrZ3F/k0zT4A==}
 
-  '@betternotify/cloudflare-email@1.0.0-beta.7':
-    resolution: {integrity: sha512-TsbgAyjpDwcGwZiHxdWflK9aV2fi12J7QABx5Oi+GYIbeaG1AUE6Yk37w4pM9HFIHaM/Lmw6n7lfP8/XW0cB0w==}
+  '@betternotify/cloudflare-email@1.0.0-beta.8':
+    resolution: {integrity: sha512-yfOvq30/xnCdadO0n7OeKrnZo/MmWymijPocRAj35Obq5ZGQI/nSOkWiLGzfR1ccXDkJpsInB086sZFW9LYP2Q==}
     engines: {node: '>=22'}
 
   '@betternotify/core@1.0.0-beta.11':
     resolution: {integrity: sha512-AfHg5/7HiMZS2UUu+cbL/Vo/EYX+u5OW2Vja3bN015RaACjnjLpBtBnqyMujSNAQs0IqHt2e3WsmBw/VCFEdXg==}
     engines: {node: '>=22'}
 
+  '@betternotify/core@1.0.0-beta.12':
+    resolution: {integrity: sha512-u2u9NHkAELEFB7s6qrkVPVu4geo+k3f+SZchl0Fo+nZuSpIOx/UP+wSt16QI7XVC44IkVtz9fSvBt/vQZjlxdw==}
+    engines: {node: '>=22'}
+
   '@betternotify/email@1.0.0-beta.7':
     resolution: {integrity: sha512-kfkPAfRoMMhMChqNNJoLrI96e6bbZjm5lQliRpBpdfex75u/bNcSCPuomGaoGvZch062WTbURaYnEhvdNkmiNQ==}
+    engines: {node: '>=22'}
+
+  '@betternotify/email@1.0.0-beta.8':
+    resolution: {integrity: sha512-Tjti2D3ae3Pgu0zC8E/mW8zVQt+Vc7iRYgijREMBSzLeUitXp4XCw0T5F2hI7jbwLyAcpL/EqOXqo93ubY6dOA==}
     engines: {node: '>=22'}
 
   '@betternotify/react-email@1.0.0-beta.6':
@@ -5481,12 +5489,17 @@ snapshots:
 
   '@better-fetch/fetch@1.1.21': {}
 
-  '@betternotify/cloudflare-email@1.0.0-beta.7':
+  '@betternotify/cloudflare-email@1.0.0-beta.8':
     dependencies:
-      '@betternotify/core': 1.0.0-beta.11
-      '@betternotify/email': 1.0.0-beta.7
+      '@betternotify/core': 1.0.0-beta.12
+      '@betternotify/email': 1.0.0-beta.8
 
   '@betternotify/core@1.0.0-beta.11':
+    dependencies:
+      '@better-fetch/fetch': 1.1.21
+      '@standard-schema/spec': 1.1.0
+
+  '@betternotify/core@1.0.0-beta.12':
     dependencies:
       '@better-fetch/fetch': 1.1.21
       '@standard-schema/spec': 1.1.0
@@ -5494,6 +5507,11 @@ snapshots:
   '@betternotify/email@1.0.0-beta.7':
     dependencies:
       '@betternotify/core': 1.0.0-beta.11
+      '@standard-schema/spec': 1.1.0
+
+  '@betternotify/email@1.0.0-beta.8':
+    dependencies:
+      '@betternotify/core': 1.0.0-beta.12
       '@standard-schema/spec': 1.1.0
 
   '@betternotify/react-email@1.0.0-beta.6(react-email@6.11.11(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@10.2.2))(react@19.3.1)':
