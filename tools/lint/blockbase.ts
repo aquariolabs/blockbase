@@ -8,6 +8,7 @@ const DIRECTIVE_PATTERNS = [
   /^\s*(?:oxfmt|prettier|biome)-ignore\b/,
   /^\s*(?:v8|c8|istanbul)\s+ignore\b/,
   /^\s*@(?:vite-ignore|jsx|jsxImportSource|jsxRuntime|jsxFrag)\b/,
+  /^\s*@(?:vitest|jest)-environment(?:-options)?\s/,
   /^\s*[#@]__(?:PURE|NO_SIDE_EFFECTS)__\s*$/,
 ];
 
