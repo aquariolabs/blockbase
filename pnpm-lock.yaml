@@ -180,8 +180,8 @@ catalogs:
       specifier: 1.0.0-beta.7
       version: 1.0.0-beta.7
     '@betternotify/core':
-      specifier: 1.0.0-beta.11
-      version: 1.0.0-beta.11
+      specifier: 1.0.0-beta.12
+      version: 1.0.0-beta.12
     '@betternotify/email':
       specifier: 1.0.0-beta.7
       version: 1.0.0-beta.7
@@ -410,7 +410,7 @@ importers:
         version: 1.0.0-beta.7
       '@betternotify/core':
         specifier: 'catalog:'
-        version: 1.0.0-beta.11
+        version: 1.0.0-beta.12
       '@betternotify/email':
         specifier: 'catalog:'
         version: 1.0.0-beta.7
@@ -873,8 +873,8 @@ packages:
     resolution: {integrity: sha512-TsbgAyjpDwcGwZiHxdWflK9aV2fi12J7QABx5Oi+GYIbeaG1AUE6Yk37w4pM9HFIHaM/Lmw6n7lfP8/XW0cB0w==}
     engines: {node: '>=22'}
 
-  '@betternotify/core@1.0.0-beta.11':
-    resolution: {integrity: sha512-AfHg5/7HiMZS2UUu+cbL/Vo/EYX+u5OW2Vja3bN015RaACjnjLpBtBnqyMujSNAQs0IqHt2e3WsmBw/VCFEdXg==}
+  '@betternotify/core@1.0.0-beta.12':
+    resolution: {integrity: sha512-u2u9NHkAELEFB7s6qrkVPVu4geo+k3f+SZchl0Fo+nZuSpIOx/UP+wSt16QI7XVC44IkVtz9fSvBt/vQZjlxdw==}
     engines: {node: '>=22'}
 
   '@betternotify/email@1.0.0-beta.7':
@@ -5483,22 +5483,22 @@ snapshots:
 
   '@betternotify/cloudflare-email@1.0.0-beta.7':
     dependencies:
-      '@betternotify/core': 1.0.0-beta.11
+      '@betternotify/core': 1.0.0-beta.12
       '@betternotify/email': 1.0.0-beta.7
 
-  '@betternotify/core@1.0.0-beta.11':
+  '@betternotify/core@1.0.0-beta.12':
     dependencies:
       '@better-fetch/fetch': 1.1.21
       '@standard-schema/spec': 1.1.0
 
   '@betternotify/email@1.0.0-beta.7':
     dependencies:
-      '@betternotify/core': 1.0.0-beta.11
+      '@betternotify/core': 1.0.0-beta.12
       '@standard-schema/spec': 1.1.0
 
   '@betternotify/react-email@1.0.0-beta.6(react-email@6.11.11(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@10.2.2))(react@19.3.1)':
     dependencies:
-      '@betternotify/core': 1.0.0-beta.11
+      '@betternotify/core': 1.0.0-beta.12
       '@betternotify/email': 1.0.0-beta.7
       react: 19.3.1
       react-email: 6.11.11(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@10.2.2)
