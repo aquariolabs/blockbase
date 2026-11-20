@@ -9,7 +9,9 @@ apps, packages, formatação, lint, testes e builds.
 - `packages/ui`: pacote `@workspace/ui` com Tailwind, shadcn/ui e componentes
   React reutilizáveis
 - `packages/emails`: templates transacionais com React Email
-- `.github/workflows`: CI, testes e deploy
+- `packages/db`: schema Drizzle/libSQL das tabelas de auth e a cópia anonimizada
+  para preview
+- `.github/workflows`: CI, testes, deploy e snapshot anonimizado
 - `.claude`: prepara as sessões cloud do Claude Code, instalando o Vite+, o
   Node.js do projeto e as dependências quando a sessão começa
 
@@ -66,11 +68,20 @@ mudanças: formatação, lint, testes e build de todos os projetos.
 As variáveis de ambiente esperadas pelo app ficam em
 `.env.schema`.
 
+## Banco de preview
+
+Pull requests não recebem a produção. Com o grupo de preview configurado, cada
+PR semeia o snapshot anonimizado `<grupo>-anon-snapshot`. Sem as variáveis, o
+mecanismo fica desligado. Tokens, senha de preview e classificação de colunas
+estão em [docs/preview-database.md](docs/preview-database.md).
+
 ## Ao criar um repo a partir deste template
 
 - renomeie o app, Worker e domínio em `apps/website/wrangler.jsonc`
 - ajuste `site` em `apps/website/astro.config.ts`
 - atualize o nome usado pelo `portless` em `apps/website/package.json`
 - revise secrets e variables nos workflows do GitHub
+- se o projeto usar Turso, siga [docs/preview-database.md](docs/preview-database.md)
+  e classifique cada coluna nova em `packages/db/anonymize.config.ts`
 - substitua a homepage, SEO, Schema.org e assets sociais
 - mantenha dependências compartilhadas no catálogo do `pnpm-workspace.yaml`

@@ -1,0 +1,67 @@
+name: Delete preview database
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: read
+
+jobs:
+  delete:
+    name: Delete preview database
+    if: github.event.pull_request.user.login != 'dependabot[bot]'
+    runs-on: blacksmith-4vcpu-ubuntu-2404
+    environment: preview
+    steps:
+      - name: Skip unless the preview group is configured
+        id: gate
+        env:
+          TURSO_ORGANIZATION_SLUG: ${{ vars.TURSO_ORGANIZATION_SLUG }}
+          TURSO_PREVIEW_GROUP_NAME: ${{ vars.TURSO_PREVIEW_GROUP_NAME }}
+          TURSO_PREVIEW_API_TOKEN: ${{ secrets.TURSO_PREVIEW_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          missing=()
+          [ -n "${TURSO_ORGANIZATION_SLUG}" ] || missing+=("vars.TURSO_ORGANIZATION_SLUG")
+          [ -n "${TURSO_PREVIEW_GROUP_NAME}" ] || missing+=("vars.TURSO_PREVIEW_GROUP_NAME")
+          [ -n "${TURSO_PREVIEW_API_TOKEN}" ] || missing+=("secrets.TURSO_PREVIEW_API_TOKEN")
+          if [ "${#missing[@]}" -eq 3 ]; then
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "Preview database is off; nothing to delete."
+            exit 0
+          fi
+          if [ "${#missing[@]}" -gt 0 ]; then
+            echo "Preview database configuration is incomplete: ${missing[*]}" >&2
+            exit 1
+          fi
+          name="${TURSO_PREVIEW_GROUP_NAME}-pr-${{ github.event.pull_request.number }}"
+          case "$name" in
+            *-production)
+              echo "Refusing to delete production database ${name}." >&2
+              exit 1
+              ;;
+          esac
+          echo "enabled=true" >> "$GITHUB_OUTPUT"
+
+      - name: Check out repo
+        if: steps.gate.outputs.enabled == 'true'
+        uses: actions/checkout@v7
+
+      - name: Set up Vite+
+        if: steps.gate.outputs.enabled == 'true'
+        uses: voidzero-dev/setup-vp@250f29ce396baf5e8f24498e17c0dfdebabc26eb # v1.15.0
+        with:
+          node-version: "26.12.1"
+          cache: false
+          run-install: |
+            args: ["--filter", "@workspace/db..."]
+
+      - name: Delete the pull request database
+        if: steps.gate.outputs.enabled == 'true'
+        env:
+          TURSO_ORGANIZATION_SLUG: ${{ vars.TURSO_ORGANIZATION_SLUG }}
+          TURSO_PREVIEW_GROUP_NAME: ${{ vars.TURSO_PREVIEW_GROUP_NAME }}
+          TURSO_PREVIEW_API_TOKEN: ${{ secrets.TURSO_PREVIEW_API_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: vp run db#delete-preview
