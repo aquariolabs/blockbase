@@ -41,6 +41,10 @@ out
 .env.*.local
 env.d.ts
 
+# local sqlite databases
+local.db
+local.db-*
+
 
 # AI agent worktrees
 .claude/worktrees/

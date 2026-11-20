@@ -1,0 +1,82 @@
+name: Preview database
+
+on:
+  workflow_call:
+    outputs:
+      database_url:
+        description: libsql URL of the pull request database. Empty when preview databases are off.
+        value: ${{ jobs.provision.outputs.database_url }}
+
+permissions:
+  contents: read
+
+jobs:
+  provision:
+    name: Preview database
+    runs-on: blacksmith-4vcpu-ubuntu-2404
+    environment: preview
+    outputs:
+      database_url: ${{ steps.provision.outputs.database_url }}
+    steps:
+      # Only the preview group token is available here. The production read
+      # token stays on the anonymize environment. A missing snapshot creates
+      # an empty database. A source whose name ends in -production exits 1.
+      - name: Skip unless the preview group is configured
+        id: gate
+        env:
+          TURSO_ORGANIZATION_SLUG: ${{ vars.TURSO_ORGANIZATION_SLUG }}
+          TURSO_PREVIEW_GROUP_NAME: ${{ vars.TURSO_PREVIEW_GROUP_NAME }}
+          TURSO_PREVIEW_GROUP_TOKEN: ${{ secrets.TURSO_PREVIEW_GROUP_TOKEN }}
+        run: |
+          set -euo pipefail
+          missing=()
+          [ -n "${TURSO_ORGANIZATION_SLUG}" ] || missing+=("vars.TURSO_ORGANIZATION_SLUG")
+          [ -n "${TURSO_PREVIEW_GROUP_NAME}" ] || missing+=("vars.TURSO_PREVIEW_GROUP_NAME")
+          [ -n "${TURSO_PREVIEW_GROUP_TOKEN}" ] || missing+=("secrets.TURSO_PREVIEW_GROUP_TOKEN")
+          if [ "${#missing[@]}" -eq 3 ]; then
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::notice title=Preview database off::Set TURSO_ORGANIZATION_SLUG, TURSO_PREVIEW_GROUP_NAME and TURSO_PREVIEW_GROUP_TOKEN to seed pull request databases."
+            exit 0
+          fi
+          if [ "${#missing[@]}" -gt 0 ]; then
+            echo "Preview database configuration is incomplete: ${missing[*]}" >&2
+            exit 1
+          fi
+          case "${TURSO_PREVIEW_GROUP_NAME}-anon-snapshot" in
+            *-production)
+              echo "Refusing to seed preview data from ${TURSO_PREVIEW_GROUP_NAME}-anon-snapshot." >&2
+              exit 1
+              ;;
+          esac
+          echo "enabled=true" >> "$GITHUB_OUTPUT"
+
+      - name: Check out repo
+        if: steps.gate.outputs.enabled == 'true'
+        uses: actions/checkout@v7
+
+      - name: Set up Vite+
+        if: steps.gate.outputs.enabled == 'true'
+        uses: voidzero-dev/setup-vp@250f29ce396baf5e8f24498e17c0dfdebabc26eb # v1.15.0
+        with:
+          node-version: "26.12.1"
+          cache: false
+          run-install: |
+            args: ["--filter", "@workspace/db..."]
+
+      - name: Seed from the anonymized snapshot or create an empty database
+        id: provision
+        if: steps.gate.outputs.enabled == 'true'
+        env:
+          TURSO_ORGANIZATION_SLUG: ${{ vars.TURSO_ORGANIZATION_SLUG }}
+          TURSO_PREVIEW_GROUP_NAME: ${{ vars.TURSO_PREVIEW_GROUP_NAME }}
+          TURSO_PREVIEW_GROUP_TOKEN: ${{ secrets.TURSO_PREVIEW_GROUP_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: vp run db#provision-preview
+
+      - name: Migrate the preview database
+        if: steps.gate.outputs.enabled == 'true'
+        env:
+          VARLOCK_ENV: preview
+          DATABASE_URL: ${{ steps.provision.outputs.database_url }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_PREVIEW_GROUP_TOKEN }}
+        run: vp run db#migrate
