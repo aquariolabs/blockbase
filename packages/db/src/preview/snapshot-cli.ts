@@ -8,7 +8,7 @@ import { assertNotProduction, snapshotDatabaseName } from "./names.ts";
 const KEYS = [
   "TURSO_ORGANIZATION_SLUG",
   "TURSO_PREVIEW_GROUP_NAME",
-  "TURSO_PREVIEW_GROUP_TOKEN",
+  "TURSO_PREVIEW_API_TOKEN",
 ] as const;
 
 export async function runSnapshot(
@@ -26,7 +26,7 @@ export async function runSnapshot(
     const auth = {
       fetch: fetchImpl,
       organization: env.TURSO_ORGANIZATION_SLUG ?? "",
-      token: env.TURSO_PREVIEW_GROUP_TOKEN ?? "",
+      token: env.TURSO_PREVIEW_API_TOKEN ?? "",
     };
     await deleteDatabase({ ...auth, name });
     const hostname = await createEmptyOrSeededDatabase({ ...auth, name, group, seed: null });

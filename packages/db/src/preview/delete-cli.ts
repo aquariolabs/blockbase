@@ -7,7 +7,7 @@ import { assertNotProduction, previewDatabaseName } from "./names.ts";
 const KEYS = [
   "TURSO_ORGANIZATION_SLUG",
   "TURSO_PREVIEW_GROUP_NAME",
-  "TURSO_PREVIEW_GROUP_TOKEN",
+  "TURSO_PREVIEW_API_TOKEN",
 ] as const;
 
 export async function runDelete(
@@ -24,7 +24,7 @@ export async function runDelete(
     await deleteDatabase({
       fetch: fetchImpl,
       organization: env.TURSO_ORGANIZATION_SLUG ?? "",
-      token: env.TURSO_PREVIEW_GROUP_TOKEN ?? "",
+      token: env.TURSO_PREVIEW_API_TOKEN ?? "",
       name,
     });
     console.log(`${name} deleted`);

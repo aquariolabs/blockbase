@@ -1,4 +1,10 @@
-export const PREVIEW_PASSWORD = "preview-password";
+import { randomBytes, scryptSync } from "node:crypto";
 
-export const PREVIEW_PASSWORD_HASH =
-  "707265766965772d70617373776f7264:a1f0b744f99f98a448a417c4bada2148a94b138266e5e571fe4bcac66a8e508afd4f85fda1999f138cac2880866506d801e622206a48fdc406ea26fba6ca151a";
+const SCRYPT = { N: 16384, r: 16, p: 1, maxmem: 128 * 16384 * 16 * 2 } as const;
+
+export function hashPreviewPassword(password: string): string {
+  if (password.length === 0) throw new Error("PREVIEW_PASSWORD is required.");
+  const salt = randomBytes(16).toString("hex");
+  const key = scryptSync(password.normalize("NFKC"), salt, 64, SCRYPT);
+  return `${salt}:${key.toString("hex")}`;
+}

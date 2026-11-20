@@ -72,8 +72,8 @@ As variáveis de ambiente esperadas pelo app ficam em
 
 Pull requests não recebem a produção. Com o grupo de preview configurado, cada
 PR semeia o snapshot anonimizado `<grupo>-anon-snapshot`. Sem as variáveis, o
-mecanismo fica desligado. A configuração, a senha de preview e a classificação
-de colunas estão em [docs/preview-database.md](docs/preview-database.md).
+mecanismo fica desligado. Tokens, senha de preview e classificação de colunas
+estão em [docs/preview-database.md](docs/preview-database.md).
 
 ## Ao criar um repo a partir deste template
 

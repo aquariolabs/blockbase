@@ -28,20 +28,24 @@ jobs:
         env:
           TURSO_ORGANIZATION_SLUG: ${{ vars.TURSO_ORGANIZATION_SLUG }}
           TURSO_PREVIEW_GROUP_NAME: ${{ vars.TURSO_PREVIEW_GROUP_NAME }}
-          TURSO_PREVIEW_GROUP_TOKEN: ${{ secrets.TURSO_PREVIEW_GROUP_TOKEN }}
+          TURSO_PREVIEW_API_TOKEN: ${{ secrets.TURSO_PREVIEW_API_TOKEN }}
+          TURSO_PREVIEW_DB_TOKEN: ${{ secrets.TURSO_PREVIEW_DB_TOKEN }}
           TURSO_PROD_DATABASE_URL: ${{ vars.TURSO_PROD_DATABASE_URL }}
           TURSO_PROD_READ_TOKEN: ${{ secrets.TURSO_PROD_READ_TOKEN }}
           ANON_HASH_KEY: ${{ secrets.ANON_HASH_KEY }}
+          PREVIEW_PASSWORD: ${{ secrets.PREVIEW_PASSWORD }}
         run: |
           set -euo pipefail
           missing=()
           [ -n "${TURSO_ORGANIZATION_SLUG}" ] || missing+=("vars.TURSO_ORGANIZATION_SLUG")
           [ -n "${TURSO_PREVIEW_GROUP_NAME}" ] || missing+=("vars.TURSO_PREVIEW_GROUP_NAME")
-          [ -n "${TURSO_PREVIEW_GROUP_TOKEN}" ] || missing+=("secrets.TURSO_PREVIEW_GROUP_TOKEN")
+          [ -n "${TURSO_PREVIEW_API_TOKEN}" ] || missing+=("secrets.TURSO_PREVIEW_API_TOKEN")
+          [ -n "${TURSO_PREVIEW_DB_TOKEN}" ] || missing+=("secrets.TURSO_PREVIEW_DB_TOKEN")
           [ -n "${TURSO_PROD_DATABASE_URL}" ] || missing+=("vars.TURSO_PROD_DATABASE_URL")
           [ -n "${TURSO_PROD_READ_TOKEN}" ] || missing+=("secrets.TURSO_PROD_READ_TOKEN")
           [ -n "${ANON_HASH_KEY}" ] || missing+=("secrets.ANON_HASH_KEY")
-          if [ "${#missing[@]}" -eq 6 ]; then
+          [ -n "${PREVIEW_PASSWORD}" ] || missing+=("secrets.PREVIEW_PASSWORD")
+          if [ "${#missing[@]}" -eq 8 ]; then
             echo "enabled=false" >> "$GITHUB_OUTPUT"
             echo "::notice title=Anonymized snapshot off::Set the anonymize environment vars and secrets to copy production into the preview group."
             exit 0
@@ -77,7 +81,7 @@ jobs:
         env:
           TURSO_ORGANIZATION_SLUG: ${{ vars.TURSO_ORGANIZATION_SLUG }}
           TURSO_PREVIEW_GROUP_NAME: ${{ vars.TURSO_PREVIEW_GROUP_NAME }}
-          TURSO_PREVIEW_GROUP_TOKEN: ${{ secrets.TURSO_PREVIEW_GROUP_TOKEN }}
+          TURSO_PREVIEW_API_TOKEN: ${{ secrets.TURSO_PREVIEW_API_TOKEN }}
         run: vp run db#snapshot
 
       - name: Migrate the snapshot
@@ -85,7 +89,7 @@ jobs:
         env:
           VARLOCK_ENV: preview
           DATABASE_URL: ${{ steps.snapshot.outputs.database_url }}
-          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_PREVIEW_GROUP_TOKEN }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_PREVIEW_DB_TOKEN }}
         run: vp run db#migrate
 
       - name: Copy anonymized rows
@@ -95,6 +99,7 @@ jobs:
           TURSO_PROD_READ_TOKEN: ${{ secrets.TURSO_PROD_READ_TOKEN }}
           SNAPSHOT_DATABASE_URL: ${{ steps.snapshot.outputs.database_url }}
           SNAPSHOT_DATABASE_NAME: ${{ steps.snapshot.outputs.database_name }}
-          TURSO_PREVIEW_GROUP_TOKEN: ${{ secrets.TURSO_PREVIEW_GROUP_TOKEN }}
+          TURSO_PREVIEW_DB_TOKEN: ${{ secrets.TURSO_PREVIEW_DB_TOKEN }}
           ANON_HASH_KEY: ${{ secrets.ANON_HASH_KEY }}
+          PREVIEW_PASSWORD: ${{ secrets.PREVIEW_PASSWORD }}
         run: vp run db#anonymize

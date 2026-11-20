@@ -13,7 +13,7 @@ import {
 const KEYS = [
   "TURSO_ORGANIZATION_SLUG",
   "TURSO_PREVIEW_GROUP_NAME",
-  "TURSO_PREVIEW_GROUP_TOKEN",
+  "TURSO_PREVIEW_API_TOKEN",
 ] as const;
 
 export async function runProvision(
@@ -27,7 +27,7 @@ export async function runProvision(
     }
     const group = env.TURSO_PREVIEW_GROUP_NAME ?? "";
     const organization = env.TURSO_ORGANIZATION_SLUG ?? "";
-    const token = env.TURSO_PREVIEW_GROUP_TOKEN ?? "";
+    const token = env.TURSO_PREVIEW_API_TOKEN ?? "";
     const name = previewDatabaseName(group, env.PR_NUMBER ?? "");
     assertNotProduction(name);
     const snapshot = snapshotDatabaseName(group);

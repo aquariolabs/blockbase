@@ -6,14 +6,16 @@ import { anonymizeConfig } from "../../anonymize.config.ts";
 import { configState } from "../config-state.ts";
 import { assertNotProduction } from "../preview/names.ts";
 import { copyDatabase } from "./copy.ts";
+import { hashPreviewPassword } from "./preview-password.ts";
 
 const KEYS = [
   "TURSO_PROD_DATABASE_URL",
   "TURSO_PROD_READ_TOKEN",
   "SNAPSHOT_DATABASE_URL",
   "SNAPSHOT_DATABASE_NAME",
-  "TURSO_PREVIEW_GROUP_TOKEN",
+  "TURSO_PREVIEW_DB_TOKEN",
   "ANON_HASH_KEY",
+  "PREVIEW_PASSWORD",
 ] as const;
 
 function assertLibsqlUrl(url: string): void {
@@ -39,8 +41,13 @@ export async function runAnonymize(env: NodeJS.ProcessEnv): Promise<number> {
     if (sourceUrl === targetUrl) throw new Error("Refusing to copy a database onto itself.");
 
     const source = createClient({ url: sourceUrl, authToken: env.TURSO_PROD_READ_TOKEN });
-    const target = createClient({ url: targetUrl, authToken: env.TURSO_PREVIEW_GROUP_TOKEN });
-    await copyDatabase({ source, target, config: anonymizeConfig, hashKey: env.ANON_HASH_KEY });
+    const target = createClient({ url: targetUrl, authToken: env.TURSO_PREVIEW_DB_TOKEN });
+    await copyDatabase({
+      source,
+      target,
+      config: anonymizeConfig(hashPreviewPassword(env.PREVIEW_PASSWORD ?? "")),
+      hashKey: env.ANON_HASH_KEY,
+    });
     source.close();
     target.close();
     return 0;

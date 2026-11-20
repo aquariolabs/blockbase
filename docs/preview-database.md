@@ -5,30 +5,76 @@ workflows de banco não fazem nada. Com elas, um job diário lê a produção co
 token somente leitura, transforma cada linha na memória com
 [@snaplet/copycat](https://github.com/supabase-community/copycat) e grava só o
 resultado em `<grupo-de-preview>-anon-snapshot`, no grupo de preview. Pull
-requests semeiam esse snapshot e recebem apenas o token do grupo de preview.
+requests semeiam esse snapshot e recebem só os dois tokens do grupo de preview.
 
 Se o snapshot ainda não existir, o PR ganha um banco vazio com as migrations.
 Não há fallback para a produção: um nome de origem terminando em `-production`
 encerra o job com exit 1.
 
-## O que configurar
+## Antes de ligar
 
-Crie um grupo Turso só de preview, separado do grupo de produção. O token desse
-grupo não alcança a produção.
+Colunas `keep` continuam sendo dado real: ids, relações, timestamps. Um preview
+público, com URL previsível, deixa isso acessível. Antes de gravar os secrets,
+coloque [Cloudflare Access](https://developers.cloudflare.com/cloudflare-one/access-controls/policies/)
+na frente das URLs de preview.
+
+Crie um grupo Turso só de preview, separado do grupo de produção.
 
 No GitHub, crie o environment `anonymize` e restrinja o deployment branch à
-branch padrão. Os segredos de produção ficam só nesse environment. O workflow
-`anonymize-snapshot.yml` também recusa qualquer ref que não seja a branch padrão.
+branch padrão. `TURSO_PROD_READ_TOKEN`, `ANON_HASH_KEY` e `PREVIEW_PASSWORD`
+existem só nesse environment. O workflow também recusa qualquer ref que não
+seja a branch padrão, então um pull request não consegue pedir esse environment.
 
-| Onde                    | Nome                        | Valor                                                                |
-| ----------------------- | --------------------------- | -------------------------------------------------------------------- |
-| vars do repositório     | `TURSO_ORGANIZATION_SLUG`   | slug da organização Turso                                            |
-| vars do repositório     | `TURSO_PREVIEW_GROUP_NAME`  | nome do grupo de preview, em minúsculas                              |
-| vars do repositório     | `TURSO_PROD_DATABASE_URL`   | URL `libsql://` da produção, sem token                               |
-| environment `anonymize` | `TURSO_PREVIEW_GROUP_TOKEN` | token que cria bancos no grupo de preview e autentica o libsql deles |
-| environment `anonymize` | `TURSO_PROD_READ_TOKEN`     | token somente leitura da produção                                    |
-| environment `anonymize` | `ANON_HASH_KEY`             | chave do copycat                                                     |
-| environment `preview`   | `TURSO_PREVIEW_GROUP_TOKEN` | o mesmo token de preview, nunca o token de produção                  |
+## Tokens
+
+São dois tokens, e nenhum deles é o token da organização.
+
+`turso auth token`, ou `turso auth api-tokens mint` sem `--group`, gera um
+token da Platform API que vale para a org inteira. Com ele, o código de um
+pull request pode emitir um token da produção (`POST /databases/<prod>/auth/tokens`)
+e ler ou apagar os dados. Os workflows não leem esse token. Não o coloque em
+secret de repositório nem no environment `preview`.
+
+O job de pull request executa o código do PR. O token de API que ele vê tem de
+ser incapaz de alcançar a produção. Crie um token preso ao grupo de preview,
+só com leitura, criação e remoção de bancos:
+
+```bash
+turso auth api-tokens mint preview-ci \
+  --org <org> \
+  --group <grupo-preview> \
+  --scope read \
+  --scope db:create \
+  --scope db:delete
+```
+
+Guarde a saída em `TURSO_PREVIEW_API_TOKEN`, no environment `preview` e também
+no `anonymize` (o snapshot diário cria o banco com ele). `read` é o GET que
+descobre se o snapshot já existe. Não inclua `db:mint-token`: o acesso SQL não
+passa por token emitido na hora.
+
+O token libsql, que conecta em qualquer banco desse grupo e em nenhum outro:
+
+```bash
+turso group tokens create <grupo-preview> --expiration never
+```
+
+Guarde a saída em `TURSO_PREVIEW_DB_TOKEN`, nos mesmos dois environments. É o
+`authToken` das migrations e da cópia. Não serve para a Platform API.
+
+Jobs de `pull_request` referenciam só `TURSO_PREVIEW_API_TOKEN` e
+`TURSO_PREVIEW_DB_TOKEN`.
+
+| Onde                    | Nome                       | Valor                                          |
+| ----------------------- | -------------------------- | ---------------------------------------------- |
+| vars do repositório     | `TURSO_ORGANIZATION_SLUG`  | slug da organização Turso                      |
+| vars do repositório     | `TURSO_PREVIEW_GROUP_NAME` | nome do grupo de preview, em minúsculas        |
+| vars do repositório     | `TURSO_PROD_DATABASE_URL`  | URL `libsql://` da produção, sem token         |
+| `preview` e `anonymize` | `TURSO_PREVIEW_API_TOKEN`  | token de API com `--group` e os scopes acima   |
+| `preview` e `anonymize` | `TURSO_PREVIEW_DB_TOKEN`   | saída de `turso group tokens create`           |
+| só `anonymize`          | `TURSO_PROD_READ_TOKEN`    | token somente leitura da produção              |
+| só `anonymize`          | `ANON_HASH_KEY`            | chave do copycat                               |
+| só `anonymize`          | `PREVIEW_PASSWORD`         | senha de login do preview, fora do repositório |
 
 Token somente leitura da produção:
 
@@ -45,25 +91,29 @@ colunas `keep` e `fake` se mantêm, mas o mapa não pode ser invertido sem a cha
 openssl rand -base64 32
 ```
 
+Senha de preview. Também fica só no environment `anonymize`. O job calcula o
+hash scrypt no formato do better-auth (`salt:key`, N=16384, r=16, p=1, 64 bytes)
+na hora da cópia. O texto não entra no repositório.
+
+```bash
+openssl rand -base64 24
+```
+
+O login do preview usa o e-mail anonimizado (domínio `preview.invalid`) e esse
+secret. Tokens de OAuth não são copiados.
+
 O job `Anonymize snapshot` roda todo dia e pode ser disparado em
 `workflow_dispatch` a partir da branch padrão. Ele recria o snapshot, roda as
 migrations e copia as linhas. Os logs desse passo são contagens por tabela.
 
 `preview-database.yml` roda em pull requests, depois dos testes. `delete-preview-db.yml`
-apaga `<grupo>-pr-<número>` quando o PR fecha. Os dois usam só o token de preview.
+apaga `<grupo>-pr-<número>` quando o PR fecha.
 
 Para migrar localmente:
 
 ```bash
 DATABASE_URL=file:local.db vp run db#migrate
 ```
-
-## Senha de preview
-
-Toda coluna `password` de `accounts` vira o hash scrypt no formato do
-better-auth (`salt:key`, N=16384, r=16, p=1, 64 bytes). A senha em claro,
-igual para todas as contas do preview, é `preview-password`. O e-mail de login
-é o e-mail anonimizado, não o e-mail real. Tokens de OAuth não são copiados.
 
 ## Classificação
 
@@ -83,20 +133,20 @@ e `libsql_wasm_func_table` são infraestrutura e ficam de fora.
 
 Classificação deste template:
 
-| Tabela                                                                | Regra                                   |
-| --------------------------------------------------------------------- | --------------------------------------- |
-| `users.id`                                                            | `keep`                                  |
-| `users.name`                                                          | `fake` com `copycat.fullName`           |
-| `users.email`                                                         | `fake` com `copycat.email`              |
-| `users.email_verified`, `created_at`, `updated_at`                    | `keep`                                  |
-| `users.image`                                                         | `null`                                  |
-| `sessions`                                                            | `truncate`                              |
-| `verifications`                                                       | `truncate`                              |
-| `accounts.id`, `accounts.user_id`, `accounts.provider_id`, timestamps | `keep`                                  |
-| `accounts.account_id`                                                 | `fake` com `copycat.uuid`               |
-| `accounts.access_token`, `refresh_token`, `id_token`                  | `truncate`                              |
-| `accounts.password`                                                   | `fake` com o hash de `preview-password` |
-| demais colunas de `accounts`                                          | `null`                                  |
+| Tabela                                                                | Regra                                           |
+| --------------------------------------------------------------------- | ----------------------------------------------- |
+| `users.id`                                                            | `keep`                                          |
+| `users.name`                                                          | `fake` com `copycat.fullName`                   |
+| `users.email`                                                         | `fake` com `copycat.email` em `preview.invalid` |
+| `users.email_verified`, `created_at`, `updated_at`                    | `keep`                                          |
+| `users.image`                                                         | `null`                                          |
+| `sessions`                                                            | `truncate`                                      |
+| `verifications`                                                       | `truncate`                                      |
+| `accounts.id`, `accounts.user_id`, `accounts.provider_id`, timestamps | `keep`                                          |
+| `accounts.account_id`                                                 | `fake` com `copycat.uuid`                       |
+| `accounts.access_token`, `refresh_token`, `id_token`                  | `truncate`                                      |
+| `accounts.password`                                                   | `fake` com o hash de `PREVIEW_PASSWORD`         |
+| demais colunas de `accounts`                                          | `null`                                          |
 
 ## Coluna nova
 

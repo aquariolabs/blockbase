@@ -78,6 +78,7 @@ it("creates an empty preview database when the snapshot does not exist", async (
   const bodies: unknown[] = [];
   const fetchImpl: typeof fetch = async (input, init) => {
     if (typeof input !== "string") throw new Error("Expected a URL string");
+    expect(new Headers(init?.headers).get("authorization")).toBe("Bearer preview-api-token");
     if (init?.method === "POST") {
       if (typeof init.body !== "string") throw new Error("Expected a JSON request body");
       bodies.push(JSON.parse(init.body) as unknown);
@@ -91,7 +92,8 @@ it("creates an empty preview database when the snapshot does not exist", async (
     {
       TURSO_ORGANIZATION_SLUG: "example",
       TURSO_PREVIEW_GROUP_NAME: "app",
-      TURSO_PREVIEW_GROUP_TOKEN: "preview-token",
+      TURSO_PREVIEW_API_TOKEN: "preview-api-token",
+      TURSO_PREVIEW_DB_TOKEN: "preview-db-token",
       PR_NUMBER: "4",
     },
     fetchImpl,
@@ -108,6 +110,7 @@ it("seeds the anonymized snapshot when it already exists", async () => {
   const bodies: unknown[] = [];
   const fetchImpl: typeof fetch = async (input, init) => {
     if (typeof input !== "string") throw new Error("Expected a URL string");
+    expect(new Headers(init?.headers).get("authorization")).toBe("Bearer preview-api-token");
     if (init?.method === "POST") {
       if (typeof init.body !== "string") throw new Error("Expected a JSON request body");
       bodies.push(JSON.parse(init.body) as unknown);
@@ -123,7 +126,8 @@ it("seeds the anonymized snapshot when it already exists", async () => {
     {
       TURSO_ORGANIZATION_SLUG: "example",
       TURSO_PREVIEW_GROUP_NAME: "app",
-      TURSO_PREVIEW_GROUP_TOKEN: "preview-token",
+      TURSO_PREVIEW_API_TOKEN: "preview-api-token",
+      TURSO_PREVIEW_DB_TOKEN: "preview-db-token",
       PR_NUMBER: "4",
     },
     fetchImpl,
@@ -142,7 +146,7 @@ it("seeds the anonymized snapshot when it already exists", async () => {
 it("stays off when no preview variables are configured", async () => {
   expect(
     configState(
-      ["TURSO_ORGANIZATION_SLUG", "TURSO_PREVIEW_GROUP_NAME", "TURSO_PREVIEW_GROUP_TOKEN"],
+      ["TURSO_ORGANIZATION_SLUG", "TURSO_PREVIEW_GROUP_NAME", "TURSO_PREVIEW_API_TOKEN"],
       {},
     ),
   ).toBe("off");

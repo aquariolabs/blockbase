@@ -2,14 +2,16 @@ import { scryptSync } from "node:crypto";
 import { readFileSync } from "node:fs";
 
 import { createClient, type Client } from "@libsql/client";
+import { copycat } from "@snaplet/copycat";
 import { expect, it } from "vite-plus/test";
 
-import { anonymizeConfig } from "../anonymize.config.ts";
+import { anonymizeConfig, fakeEmail } from "../anonymize.config.ts";
 import { copyDatabase } from "../src/anonymize/copy.ts";
-import { PREVIEW_PASSWORD, PREVIEW_PASSWORD_HASH } from "../src/anonymize/preview-password.ts";
+import { hashPreviewPassword } from "../src/anonymize/preview-password.ts";
 import type { AnonymizeConfig } from "../src/anonymize/types.ts";
 
 const HASH_KEY = "test-hash-key";
+const TEST_PREVIEW_PASSWORD = "test-only-secret";
 
 function textCell(value: unknown): string {
   if (typeof value === "string") return value;
@@ -139,14 +141,16 @@ it("anonymizes auth rows in memory and keeps no original fake value", async () =
   await applyAuthSchema(again);
   await seedAuth(source);
 
+  const previewHash = hashPreviewPassword(TEST_PREVIEW_PASSWORD);
+  const config = anonymizeConfig(previewHash);
   const lines: string[] = [];
   const originalLog = console.log;
   console.log = (message?: unknown) => {
     lines.push(String(message));
   };
   try {
-    await copyDatabase({ source, target, config: anonymizeConfig, hashKey: HASH_KEY });
-    await copyDatabase({ source, target: again, config: anonymizeConfig, hashKey: HASH_KEY });
+    await copyDatabase({ source, target, config, hashKey: HASH_KEY });
+    await copyDatabase({ source, target: again, config, hashKey: HASH_KEY });
   } finally {
     console.log = originalLog;
   }
@@ -159,6 +163,7 @@ it("anonymizes auth rows in memory and keeps no original fake value", async () =
   const emails = users.rows.map((row) => textCell(row.email));
   const names = users.rows.map((row) => textCell(row.name));
   expect(new Set(emails).size).toBe(2);
+  expect(emails.every((email) => email.endsWith(".invalid"))).toBe(true);
   expect(emails).not.toContain("ada.lovelace@example.com");
   expect(emails).not.toContain("alan.turing@example.com");
   expect(names).not.toContain("Ada Lovelace");
@@ -184,8 +189,10 @@ it("anonymizes auth rows in memory and keeps no original fake value", async () =
   expect(account?.access_token).toBeNull();
   expect(account?.refresh_token).toBeNull();
   expect(account?.id_token).toBeNull();
-  expect(account?.password).toBe(PREVIEW_PASSWORD_HASH);
+  expect(account?.password).toBe(previewHash);
   expect(account?.password).not.toBe("real-password-not-for-preview");
+  if (typeof account?.password !== "string") throw new Error("Expected a password hash");
+  expect(account.password).not.toContain(TEST_PREVIEW_PASSWORD);
 
   const violations = await target.execute("PRAGMA foreign_key_check");
   expect(violations.rows).toHaveLength(0);
@@ -244,15 +251,34 @@ it("replaces random-bytes without keeping the original", async () => {
   expect(new Set(secrets).size).toBe(2);
 });
 
-it("documents a preview password hash that verifies with better-auth scrypt", () => {
-  const [salt, key] = PREVIEW_PASSWORD_HASH.split(":");
-  expect(salt).toBeTruthy();
-  expect(key).toBeTruthy();
-  const derived = scryptSync(PREVIEW_PASSWORD.normalize("NFKC"), salt ?? "", 64, {
-    N: 16384,
-    r: 16,
-    p: 1,
-    maxmem: 128 * 16384 * 16 * 2,
-  });
-  expect(derived.toString("hex")).toBe(key);
+it("keeps fake emails deterministic, unique, and on the .invalid domain", () => {
+  copycat.setHashKey(HASH_KEY);
+  const ada = fakeEmail("ada.lovelace@example.com");
+  const alan = fakeEmail("alan.turing@example.com");
+  expect(ada.endsWith(".invalid")).toBe(true);
+  expect(alan.endsWith(".invalid")).toBe(true);
+  expect(ada).not.toBe(alan);
+  expect(ada).not.toBe("ada.lovelace@example.com");
+  expect(alan).not.toBe("alan.turing@example.com");
+  expect(fakeEmail("ada.lovelace@example.com")).toBe(ada);
+});
+
+it("derives the preview password hash from the secret", () => {
+  const first = hashPreviewPassword(TEST_PREVIEW_PASSWORD);
+  const second = hashPreviewPassword(TEST_PREVIEW_PASSWORD);
+  expect(first).not.toBe(second);
+  expect(first).not.toContain(TEST_PREVIEW_PASSWORD);
+  for (const hash of [first, second]) {
+    const [salt, key] = hash.split(":");
+    expect(salt).toHaveLength(32);
+    expect(key).toHaveLength(128);
+    const derived = scryptSync(TEST_PREVIEW_PASSWORD.normalize("NFKC"), salt ?? "", 64, {
+      N: 16384,
+      r: 16,
+      p: 1,
+      maxmem: 128 * 16384 * 16 * 2,
+    });
+    expect(derived.toString("hex")).toBe(key);
+  }
+  expect(() => hashPreviewPassword("")).toThrow("PREVIEW_PASSWORD is required.");
 });
